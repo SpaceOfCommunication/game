@@ -1,0 +1,1 @@
+export const ONE_CLICK_TARGET_SIZE = 50
