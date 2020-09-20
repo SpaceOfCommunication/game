@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Polyfill stable language features. These imports will be optimized by `@babel/preset-env`.
  *
@@ -5,3 +6,8 @@
  */
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
+
+// PouchDB polyfills
+(window as any).global = window;
+(window as any).process = {};
+(window as any).process.nextTick = setTimeout;

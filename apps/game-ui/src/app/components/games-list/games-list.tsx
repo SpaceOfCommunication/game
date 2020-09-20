@@ -9,7 +9,7 @@ const games = [
 export const GamesList: FC = () => {
 
   const gamesList = games.map((game) => (
-    <p>{game.picture}</p>
+    <p key={game.picture}>{game.picture}</p>
   ))
   return (
     <div>{gamesList}</div>
