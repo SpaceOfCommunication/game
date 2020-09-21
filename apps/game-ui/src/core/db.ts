@@ -1,5 +1,6 @@
 import PouchDB from 'pouchdb-browser';
 import PouchAuthentication from 'pouchdb-authentication';
+import { environment } from '../environments/environment';
 
 PouchDB.plugin(PouchAuthentication);
 
@@ -12,11 +13,17 @@ export class DB {
     const DBName = `userdb-${this.hexEncode(userName)}`;
 
     // eslint-disable-next-line @typescript-eslint/camelcase
-    this._db = new PouchDB(`http://localhost:5984/${DBName}`, { skip_setup: true });
+    this._db = new PouchDB(`${environment.pouchURL}/${DBName}`, { skip_setup: true });
   }
 
-  public signUp() {
-    return
+  public signUp(username: string, password: string) {
+    return fetch(`${environment.apiPath}/user-create`, {
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
+      },    
+      method: 'POST',
+      body: JSON.stringify({ username, password })
+    });
   }
 
   public login() {

@@ -8,8 +8,8 @@ import { DB } from '../core/db';
 export const App = () => {
 
   const db = new DB();
-  // db.signUp();
-  db.login();
+  db.signUp('batman', 'brucewayne');
+  // db.login();
 
   return (
     <>

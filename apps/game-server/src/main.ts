@@ -1,8 +1,32 @@
 import * as express from 'express';
+import * as winston from 'winston';
+import * as expressWinston from 'express-winston';
 import { DB } from './app/db';
 
 const db = new DB()
 const app = express();
+
+app.use(express.json());
+
+// LOGGER CONFIGURATION
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const transports: any[] = [
+  new winston.transports.File({ filename: 'error.log', level: 'error' })
+];
+if (process.env.NODE_ENV !== 'production') {
+  transports.push(new winston.transports.Console({ format: winston.format.simple() }));
+}
+app.use(expressWinston.logger({
+  level: 'info',
+  transports,
+  format: winston.format.combine(
+    winston.format.colorize(),
+    winston.format.json()
+  )
+}));
+
+// AUTH: CRETE NEW USER API
 
 app.post('/api/user-create', async (req, res) => {
   const { username, password} = req.body;
