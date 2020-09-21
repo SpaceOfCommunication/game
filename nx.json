@@ -28,6 +28,9 @@
     "game-ui-e2e": {
       "tags": [],
       "implicitDependencies": ["game-ui"]
+    },
+    "game-server": {
+      "tags": []
     }
   }
 }

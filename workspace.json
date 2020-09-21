@@ -51,7 +51,8 @@
         "serve": {
           "builder": "@nrwl/web:dev-server",
           "options": {
-            "buildTarget": "game-ui:build"
+            "buildTarget": "game-ui:build",
+            "proxyConfig": "apps/game-ui/proxy.conf.json"
           },
           "configurations": {
             "production": {
@@ -103,6 +104,61 @@
             "linter": "eslint",
             "tsConfig": ["apps/game-ui-e2e/tsconfig.e2e.json"],
             "exclude": ["**/node_modules/**", "!apps/game-ui-e2e/**/*"]
+          }
+        }
+      }
+    },
+    "game-server": {
+      "root": "apps/game-server",
+      "sourceRoot": "apps/game-server/src",
+      "projectType": "application",
+      "prefix": "game-server",
+      "schematics": {},
+      "architect": {
+        "build": {
+          "builder": "@nrwl/node:build",
+          "options": {
+            "outputPath": "dist/apps/game-server",
+            "main": "apps/game-server/src/main.ts",
+            "tsConfig": "apps/game-server/tsconfig.app.json",
+            "assets": ["apps/game-server/src/assets"]
+          },
+          "configurations": {
+            "production": {
+              "optimization": true,
+              "extractLicenses": true,
+              "inspect": false,
+              "fileReplacements": [
+                {
+                  "replace": "apps/game-server/src/environments/environment.ts",
+                  "with": "apps/game-server/src/environments/environment.prod.ts"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@nrwl/node:execute",
+          "options": {
+            "buildTarget": "game-server:build"
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:lint",
+          "options": {
+            "linter": "eslint",
+            "tsConfig": [
+              "apps/game-server/tsconfig.app.json",
+              "apps/game-server/tsconfig.spec.json"
+            ],
+            "exclude": ["**/node_modules/**", "!apps/game-server/**/*"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "options": {
+            "jestConfig": "apps/game-server/jest.config.js",
+            "passWithNoTests": true
           }
         }
       }
