@@ -1,26 +1,31 @@
+import { AppBar, CssBaseline, Toolbar, Typography } from '@material-ui/core';
 import React from 'react';
-// import { Auth } from '../core/auth';
+
 import { StoreProvider } from '../core/store';
 
 import './app.scss';
 
-import GameOneCLick from './components/game-one-click/game-one-click';
-import GamesList from './components/games-list/games-list';
-
 export const App = () => {
 
-  // if (!user.isAuthenticated) {
-  //   Auth.login('batman', 'brucewayne').then((authData) => {
-  //     user.setAuthData(authData);
-  //     console.log('AUTH', user.isAuthenticated);
-  //   })
-  // }
+
 
   return (
+    <>
+    <CssBaseline />
     <StoreProvider>
-      <GamesList></GamesList>
-      <GameOneCLick></GameOneCLick>
+      <AppBar position="relative">
+          <Toolbar>
+            <Typography variant="h6" color="inherit" noWrap>
+              Пространство Общения - Игры
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <main>
+          
+        </main>
     </StoreProvider>
+    </>
+
   );
 };
 

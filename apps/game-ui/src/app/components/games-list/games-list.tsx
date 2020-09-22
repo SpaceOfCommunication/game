@@ -1,6 +1,7 @@
-import { useStore } from 'apps/game-ui/src/core/store';
 import { observer } from 'mobx-react';
 import React, { FC } from 'react';
+
+import { useStore } from '../../../core/store';
 
 const games = [
   { picture: 'PICT1', melody: '' },
