@@ -4,49 +4,33 @@ import { environment } from '../environments/environment';
 
 PouchDB.plugin(PouchAuthentication);
 
+export function getLocalDB() {
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  return new DB(new PouchDB('localUserDB', { skip_setup: true }));
+}
+
+export function getRemoteDB(userName: string) {
+  const DBName = `userdb-${hexEncode(userName)}`;
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  return new PouchDB(`${environment.pouchURL}/${DBName}`, { skip_setup: true });
+}
+
+
+function hexEncode(text: string) {
+  let hex: string;
+  let result = "";
+  for (let i = 0; i < text.length; i++) {
+    hex = text.charCodeAt(i).toString(16);
+    result += ("000" + hex).slice(-4);
+  }
+  return result;
+}
+
 export class DB {
+  
+  constructor(private pouchDB: PouchDB.Database) {}
 
-  private _db: PouchDB.Database;
-
-  constructor() {
-    const userName = 'batman';
-    const DBName = `userdb-${this.hexEncode(userName)}`;
-
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    this._db = new PouchDB(`${environment.pouchURL}/${DBName}`, { skip_setup: true });
+  public syncWithRemoteDB(remotePouchDB: PouchDB.Database) {
+    this.pouchDB.sync(remotePouchDB, {live: true, retry: true});
   }
-
-  public signUp(username: string, password: string) {
-    return fetch(`${environment.apiPath}/user-create`, {
-      headers: {
-        'Content-Type': 'application/json;charset=utf-8'
-      },    
-      method: 'POST',
-      body: JSON.stringify({ username, password })
-    });
-  }
-
-  public login() {
-    this._db.logIn('batman', 'brucewayne', function (err, response) {
-      if (err) {
-        if (err.name === 'unauthorized' || err.name === 'forbidden') {
-          console.log("name or password incorrect")
-        } else {
-          console.log("cosmic rays, a meteor, etc.")
-        }
-      }
-    });
-  }
-
-  private hexEncode(text: string) {
-    let hex : string;
-    let result = "";
-    for (let i = 0; i < text.length; i++) {
-      hex = text.charCodeAt(i).toString(16);
-      result += ("000" + hex).slice(-4);
-    }
-
-    return result
-  }
-
 }

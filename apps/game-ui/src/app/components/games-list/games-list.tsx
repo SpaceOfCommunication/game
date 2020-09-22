@@ -1,3 +1,5 @@
+import { useStore } from 'apps/game-ui/src/core/store';
+import { observer } from 'mobx-react';
 import React, { FC } from 'react';
 
 const games = [
@@ -6,14 +8,19 @@ const games = [
   { picture: 'PICT3', melody: '' }
 ]
 
-export const GamesList: FC = () => {
+export const GamesList: FC = observer(() => {
+  const store = useStore();
 
   const gamesList = games.map((game) => (
     <p key={game.picture}>{game.picture}</p>
   ))
   return (
-    <div>{gamesList}</div>
+    <>
+      <p>{store.isAuthenticated ? "Authenticated" : "Not Authenticated"}</p>
+      <div>{gamesList}</div>
+    </>
+    
   );
-}
+})
 
 export default GamesList

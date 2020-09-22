@@ -1,21 +1,26 @@
 import React from 'react';
-import GameOneCLick from './components/game-one-click/game-one-click';
+// import { Auth } from '../core/auth';
+import { StoreProvider } from '../core/store';
 
 import './app.scss';
+
+import GameOneCLick from './components/game-one-click/game-one-click';
 import GamesList from './components/games-list/games-list';
-import { DB } from '../core/db';
 
 export const App = () => {
 
-  const db = new DB();
-  db.signUp('batman', 'brucewayne');
-  // db.login();
+  // if (!user.isAuthenticated) {
+  //   Auth.login('batman', 'brucewayne').then((authData) => {
+  //     user.setAuthData(authData);
+  //     console.log('AUTH', user.isAuthenticated);
+  //   })
+  // }
 
   return (
-    <>
+    <StoreProvider>
       <GamesList></GamesList>
       <GameOneCLick></GameOneCLick>
-    </>
+    </StoreProvider>
   );
 };
 
