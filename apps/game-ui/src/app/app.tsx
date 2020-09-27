@@ -1,23 +1,24 @@
-import { AppBar, Button, CssBaseline, Grid, makeStyles, styled, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Button, CssBaseline, Grid, makeStyles, Toolbar, Typography } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
+import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import React from 'react';
 
 import './app.scss';
 
 import { StoreProvider } from '../core/store';
 import GamesList from './components/games-list/games-list';
-
-const Message = (props) => {
-  return <Typography variant="h5" align="center" color="textSecondary" paragraph>
-    {props.children}
-  </Typography>
-}
+import GameConstructor from './components/game-constructor/game-constructor';
+import Message from './components/ui/message';
 
 const useStyles = makeStyles({
   main: {
     display: 'flex',
     flexGrow: 1
   },
+  link: {
+    textDecoration: 'none',
+    color: 'inherit'
+  }
 });
 
 const games = [
@@ -43,11 +44,27 @@ export const App = () => {
           </Toolbar>
         </AppBar>
         <main className={classes.main}>
-          {hasGames && <GamesList games={games}></GamesList>}
-          <Grid container spacing={2} justify="center" alignContent="center">
-            {!hasGames && <Grid item xs={12}><Message>У вас нет ни одной игры. Попробуйте создать одну.</Message></Grid>}
-            <Grid item><Button variant="contained" color="primary" size="large" startIcon={<AddIcon />}>Создать новую игру</Button></Grid>
-          </Grid>
+          <Router>
+            <Switch>
+              <Route path="/create-game">
+                <GameConstructor></GameConstructor>
+              </Route>
+              <Route path="/">
+                {hasGames && <GamesList games={games}></GamesList>}
+                <Grid container justify="center" alignContent="center">
+                  {!hasGames && <Grid item xs={12}><Message>У вас нет ни одной игры. Попробуйте создать одну.</Message></Grid>}
+                  <Grid item>
+                    <Link to="/create-game" className={classes.link}>
+                      <Button variant="contained" color="primary" size="large" startIcon={<AddIcon />}>
+                        Создать новую игру
+                      </Button>
+                    </Link>
+                  </Grid>
+                </Grid>
+              </Route>
+            </Switch>
+          </Router>
+
         </main>
       </StoreProvider>
     </>

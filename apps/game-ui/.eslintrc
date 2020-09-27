@@ -140,6 +140,12 @@
     ],
     "no-with": "warn",
     "no-whitespace-before-property": "warn",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": ["@material-ui/*/*/*", "!@material-ui/core/test-utils/*"]
+      }
+    ],    
     "react-hooks/exhaustive-deps": "warn",
     "require-yield": "warn",
     "rest-spread-spacing": ["warn", "never"],
