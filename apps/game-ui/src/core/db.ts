@@ -28,9 +28,10 @@ function hexEncode(text: string) {
 
 export class DB {
   
-  constructor(private pouchDB: PouchDB.Database) {}
+  constructor(public pouchDB: PouchDB.Database) {}
 
   public syncWithRemoteDB(remotePouchDB: PouchDB.Database) {
     this.pouchDB.sync(remotePouchDB, {live: true, retry: true});
   }
+
 }

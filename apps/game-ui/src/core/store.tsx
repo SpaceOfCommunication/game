@@ -1,34 +1,65 @@
 import React, { createContext, useContext } from 'react';
 import { DB, getLocalDB } from './db';
-import { useLocalStore } from 'mobx-react'
+import { useLocalObservable } from 'mobx-react-lite'
+
+export interface Game {
+  title: string;
+  picture: Blob;
+  audio: Blob
+}
 
 export interface Store {
   userName?: string;
   db: DB;
+  games: Game[];
   isAuthenticated: boolean;
-  authorize(userName: string, remotePouchDB: PouchDB.Database): void;
+  isInitialized: boolean;
+  authorize(userName: string, remotePouchDB: PouchDB.Database): Promise<void>;
+  fetchGames(): Promise<unknown[]>;
+  initialize(): Promise<void>;
 }
 
 function createStore(): Store {
-  return {
+  const db = getLocalDB(); 
+
+  const store = {
     userName: undefined,
-    db: getLocalDB(),
+    isInitialized: false,
+    db,
+    games: [],
 
     get isAuthenticated() {
       return !!this.userName;
     },
 
-    authorize(this: Store, userName: string, remotePouchDB: PouchDB.Database) {
+    async authorize(this: Store, userName: string, remotePouchDB: PouchDB.Database) {
       this.userName = userName;
-      this.db.syncWithRemoteDB(remotePouchDB);
+      return this.db.syncWithRemoteDB(remotePouchDB);
+    },
+
+    async fetchGames() {
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      const docs = await db.pouchDB.allDocs({ include_docs: true, attachments: true });
+      console.log('docs', docs);
+      return docs.rows;
+    },
+
+    async initialize() {
+      await store.fetchGames();
+      store.isInitialized = true;
     }
-  }
+  };
+
+  store.initialize();
+  console.log('creation');
+
+  return store;
 }
 
 const StoreContext = createContext<null | Store>(null);
 
 export const StoreProvider = ({ children }) => {
-  const store = useLocalStore(createStore);
+  const store = useLocalObservable(createStore);
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
 };
 

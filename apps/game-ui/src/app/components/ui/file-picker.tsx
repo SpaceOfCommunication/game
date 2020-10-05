@@ -1,25 +1,26 @@
 import React, { FC, useRef } from 'react';
 
 export interface FilePickerProps {
-  id?: string;
   accept?: string;
   ariaDescribedby?: string;
-  onFileSelection: (files?: FileList) => void
+  onFileSelection?: (files?: FileList) => void
 }
 
 const FilePicker: FC<FilePickerProps> = (props) => {
 
+  const { accept, ariaDescribedby, onFileSelection } = props;
   const inputEl = useRef<HTMLInputElement>(null);
 
   const onChange = () => {
-    props.onFileSelection(inputEl.current?.files as FileList)
+    if (onFileSelection) {
+      onFileSelection(inputEl.current?.files as FileList);
+    }
   }
   
   return (
     <input type="file" ref={inputEl} 
-      id={props.id} 
-      accept={props.accept} 
-      aria-describedby={props.ariaDescribedby} 
+      accept={accept} 
+      aria-describedby={ariaDescribedby} 
       onChange={onChange} />
   )
 }
