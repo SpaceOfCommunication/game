@@ -4,6 +4,7 @@ import { useStore } from '../../../core/store';
 import React, { FC, useCallback, useState } from 'react';
 import Message from '../ui/message';
 import FilePicker from '../ui/file-picker';
+import { DocModel } from '../../../core/interfaces';
 
 interface FormState {
   picture?: File;
@@ -38,11 +39,10 @@ export const GameConstructor: FC = () => {
 
 
   const handleGameSave = useCallback(() => {
-    console.log(formState);
     if (!formState.picture || !formState.audio) {
       return;
     }
-    store.db.pouchDB.post({
+    store.db.pouchDB.post<DocModel>({
       title: 'MyNewGameTitle',
       _attachments: {
         img: {

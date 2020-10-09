@@ -1,32 +1,36 @@
 import React, { createContext, useContext } from 'react';
-import { DB, getLocalDB } from './db';
+import { getLocalDB } from './db';
 import { useLocalObservable } from 'mobx-react-lite'
+import { observable } from 'mobx';
+import { DocModel, Game, GameModel, Store } from './interfaces';
 
-export interface Game {
-  title: string;
-  picture: Blob;
-  audio: Blob
+function doc2model(doc: PouchDB.Core.ExistingDocument<DocModel>): GameModel {
+  return {
+    id: doc._id,
+    title: doc.title,
+    picture: doc._attachments.img.data,
+    audio: doc._attachments.sfx.data,
+  }
 }
 
-export interface Store {
-  userName?: string;
-  db: DB;
-  games: Game[];
-  isAuthenticated: boolean;
-  isInitialized: boolean;
-  authorize(userName: string, remotePouchDB: PouchDB.Database): Promise<void>;
-  fetchGames(): Promise<unknown[]>;
-  initialize(): Promise<void>;
+function model2game(model: GameModel): Game {
+  const { id, title, picture, audio } = model;
+  return {
+    id,
+    title,
+    picture: URL.createObjectURL(picture),
+    audio: URL.createObjectURL(audio),
+  }
 }
 
-function createStore(): Store {
+function createStore() {
   const db = getLocalDB(); 
 
-  const store = {
+  const store : Store = {
     userName: undefined,
     isInitialized: false,
     db,
-    games: [],
+    games: observable([]),
 
     get isAuthenticated() {
       return !!this.userName;
@@ -37,15 +41,17 @@ function createStore(): Store {
       return this.db.syncWithRemoteDB(remotePouchDB);
     },
 
-    async fetchGames() {
+    async fetchGameModels() {
       // eslint-disable-next-line @typescript-eslint/camelcase
-      const docs = await db.pouchDB.allDocs({ include_docs: true, attachments: true });
-      console.log('docs', docs);
-      return docs.rows;
+      const docs = await db.pouchDB.allDocs<DocModel>({ include_docs: true, attachments: true, binary: true });
+      const models = docs.rows.map(({ doc}) => doc && doc2model(doc)).filter((model) => !!model) as GameModel[];
+      return models;
     },
 
     async initialize() {
-      await store.fetchGames();
+      const gameModels = await store.fetchGameModels();
+      const games = gameModels.map(model2game);
+      store.games.replace(games);
       store.isInitialized = true;
     }
   };
@@ -64,9 +70,9 @@ export const StoreProvider = ({ children }) => {
 };
 
 export const useStore = () => {
-  const store = useContext(StoreContext)
+  const store = useContext(StoreContext);
   if (!store) {
-    throw new Error('useStore must be used within a StoreProvider.')
+    throw new Error('useStore must be used within a StoreProvider.');
   }
   return store
 }
