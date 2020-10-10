@@ -1,91 +1,95 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import { Button, FormControl, FormHelperText, Grid, makeStyles } from '@material-ui/core';
+import { Button, Grid } from '@material-ui/core';
 import { useStore } from '../../../core/store';
 import React, { FC, useCallback, useState } from 'react';
 import Message from '../ui/message';
-import FilePicker from '../ui/file-picker';
-import { DocModel } from '../../../core/interfaces';
+import { DocModel, GameModel } from '../../../core/interfaces';
+import { useCommonStyles } from '../../../core/styles';
+import GameConstructorEntry from '../game-contructor-entry/game-contructor-entry';
+import AddIcon from '@material-ui/icons/Add';
+import SaveIcon from '@material-ui/icons/Save';
 
-interface FormState {
-  picture?: File;
-  audio?: File;
+export interface GameConstructorProps {
+  game?: GameModel;
 }
 
-const useStyles = makeStyles({
-  gridItem: {
-    textAlign: 'center',
-    padding: '15px'
-  }
-});
+interface GameScreenModelDraft {
+  picture?: Blob;
+  audio?: Blob
+}
 
-export const GameConstructor: FC = () => {
+function isValidScreen(screen: GameScreenModelDraft) {
+  return screen.picture && screen.audio;
+}
 
-  const classes = useStyles();
+export const GameConstructor: FC<GameConstructorProps> = (props) => {
+  const { game } = props;
+  const classes = useCommonStyles();
   const store = useStore();
-  const [formState, setFormState] = useState<FormState>({ picture: undefined, audio: undefined });
-  const isFormDisabled = !(formState.picture && formState.audio);
+  const [screensState, setScreensState] = useState<GameScreenModelDraft[]>(game?.screens || []);
+  const [showValidationState, setShowValidationState] = useState(false);
+  const [isFormDisabled, setIsFormDisabled] = useState(!game?.screens.length);
 
-  const handlePictureSelection = useCallback((filelist) => {
-    if (filelist.length > 0) {
-      setFormState({ ...formState, picture: filelist[0] });
-    }
-  }, [formState]);
-
-  const handleAudioSelection = useCallback((filelist) => {
-    if (filelist.length > 0) {
-      setFormState({ ...formState, audio: filelist[0] });
-    }
-  }, [formState]);
+  const handleEntryAdd = useCallback(() => {
+    setScreensState([...screensState, {}]);
+    setIsFormDisabled(false);
+  }, [screensState, setScreensState, setIsFormDisabled]);
 
 
-  const handleGameSave = useCallback(() => {
-    if (!formState.picture || !formState.audio) {
+  const handleEntryChange = useCallback((screen: GameScreenModelDraft, picture?: Blob, audio?: Blob) => {
+    screen.picture = picture;
+    screen.audio = audio;
+    setScreensState([...screensState]);
+  }, [screensState]);
+
+  const handleSave = useCallback(() => {
+    const hasEmptyFields = screensState.some((screen) => !isValidScreen(screen));
+    if (hasEmptyFields) {
+      setShowValidationState(true);
       return;
     }
-    store.db.pouchDB.post<DocModel>({
-      title: 'MyNewGameTitle',
-      _attachments: {
-        img: {
-          content_type: formState.picture.type,
-          data: formState.picture
-        },
-        sfx: {
-          content_type: formState.audio.type,
-          data: formState.audio
-        }
-      }
-    });
 
-  }, [store, formState]);
+    const _attachments: DocModel["_attachments"] = {};
+    screensState.forEach((screen, i) => {
+      const picture = screen.picture as Blob;
+      const audio = screen.audio as Blob;
+      _attachments[`img-${i}`] = {
+        content_type: picture.type,
+        data: picture
+      };
+      _attachments[`sfx-${i}`] = {
+        content_type: audio.type,
+        data: audio
+      };
+    });
+    store.db.pouchDB.post<DocModel>({title: 'GameWithManyScreens', _attachments });
+  }, [screensState, setShowValidationState, store.db.pouchDB]);
 
   return (
-    <Grid container justify="center" alignContent="center">
+    <Grid container className={classes.gridRoot} justify="center" alignContent="center">
       <Grid item xs={12}>
         <Message>Для создания игры загрузите картинку <span role="img" aria-label="иконка картинки">🖼 </span>
         и мелодию <span role="img" aria-label="иконка мелодии">🎶</span></Message>
       </Grid>
-      <Grid item xs={12} className={classes.gridItem}>
-        <FormControl>
-          <FilePicker onFileSelection={handlePictureSelection} accept="image/png, image/jpeg" ariaDescribedby="Поле выбора файла изображения"></FilePicker>
-          <FormHelperText id="my-helper-text">
-            Выберите картинку <span role="img" aria-label="иконка картинки">🖼 </span> на своем компьютере
-          </FormHelperText>
-        </FormControl>
+      {screensState.map((screen) => (
+        <GameConstructorEntry
+          onEntryChange={handleEntryChange.bind(undefined, screen)}
+          highlightEmpty={showValidationState && !isValidScreen(screen)}
+          {...screen}>
+        </GameConstructorEntry>
+      ))}
+      <Grid item xs={6} className={classes.gridItem}>
+        <Button onClick={handleEntryAdd} variant="contained" color="primary" size="large" startIcon={<AddIcon />}>
+          Добавить игровой экран
+        </Button>
       </Grid>
-      <Grid item xs={12} className={classes.gridItem}>
-        <FormControl>
-          <FilePicker onFileSelection={handleAudioSelection} accept="audio/*" ariaDescribedby="Поле выбора аудио файла"></FilePicker>
-          <FormHelperText id="my-helper-text">
-            Выберите мелодию <span role="img" aria-label="иконка мелодии">🎶</span> на своем компьютере
-          </FormHelperText>
-        </FormControl>
-      </Grid>
-      <Grid item xs={12} className={classes.gridItem}>
-        <Button disabled={isFormDisabled} onClick={handleGameSave} variant="contained" color="primary" size="large">Создать игру</Button>
+      <Grid item xs={6} className={classes.gridItem}>
+        <Button disabled={isFormDisabled} onClick={handleSave} variant="contained" color="secondary" size="large" startIcon={<SaveIcon />}>
+          Сохранить игру
+        </Button>
       </Grid>
     </Grid>
   )
 };
-
 
 export default GameConstructor

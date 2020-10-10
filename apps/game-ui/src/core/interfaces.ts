@@ -1,24 +1,32 @@
 import { IObservableArray } from 'mobx';
 import { DB } from './db';
 
-export interface GameModel {
-  id: string;
-  title: string;
+export interface GameScreenModel {
   picture: Blob;
   audio: Blob
 }
 
-export interface Game {
+export interface GameModel {
   id: string;
   title: string;
-  picture: string;
-  audio: string
+  screens: GameScreenModel[];
 }
+
+// export interface GameScreen {
+//   picture: string;
+//   audio: string
+// }
+
+// export interface Game {
+//   id: string;
+//   title: string;
+//   screens: GameScreen[];
+// }
 
 export interface Store {
   userName?: string;
   db: DB;
-  games: IObservableArray<Game>;
+  games: IObservableArray<GameModel>;
   isAuthenticated: boolean;
   isInitialized: boolean;
   authorize(userName: string, remotePouchDB: PouchDB.Database): Promise<void>;
@@ -34,7 +42,6 @@ export interface DocAttachment {
 export interface DocModel {
   title: string;
   _attachments: {
-    img: DocAttachment,
-    sfx: DocAttachment,
+    [key: string]: DocAttachment,
   }
 }

@@ -4,15 +4,16 @@ import { environment } from '../environments/environment';
 
 PouchDB.plugin(PouchAuthentication);
 
-export function getLocalDB() {
   // eslint-disable-next-line @typescript-eslint/camelcase
-  return new DB(new PouchDB('localUserDB', { skip_setup: true }));
+const pouchConfig = { skip_setup: true, auto_compaction: true };
+
+export function getLocalDB() {
+  return new DB(new PouchDB('localUserDB', pouchConfig));
 }
 
 export function getRemoteDB(userName: string) {
   const DBName = `userdb-${hexEncode(userName)}`;
-  // eslint-disable-next-line @typescript-eslint/camelcase
-  return new PouchDB(`${environment.pouchURL}/${DBName}`, { skip_setup: true });
+  return new PouchDB(`${environment.pouchURL}/${DBName}`, pouchConfig);
 }
 
 

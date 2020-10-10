@@ -1,4 +1,4 @@
-import { Button, Grid, makeStyles } from '@material-ui/core';
+import { Button, Grid } from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
 import React, { FC } from 'react';
 import { Link } from 'react-router-dom';
@@ -6,25 +6,15 @@ import AddIcon from '@material-ui/icons/Add';
 
 import { useStore } from '../../../core/store';
 import Message from '../ui/message';
+import { useCommonStyles } from '../../../core/styles';
 
 export interface GamesListProps {
   onCreateNewGame?: () => void
 };
 
-const useStyles = makeStyles({
-  link: {
-    textDecoration: 'none',
-    color: 'inherit'
-  },
-  gridItem: {
-    textAlign: 'center',
-    padding: '15px'
-  }
-});
-
 export const GamesList: FC<GamesListProps> = observer((props) => {
   const store = useStore();
-  const classes = useStyles();
+  const classes = useCommonStyles();
 
   const hasGames = store.games.length > 0;
 
@@ -33,7 +23,7 @@ export const GamesList: FC<GamesListProps> = observer((props) => {
       {hasGames && store.games.map((game) => (
         <Grid item xs={12} className={classes.gridItem} key={game.id}>
           <p>{game.title}</p>
-          <img src={game.picture} alt="Изображение игры"></img>
+          {/* <img src={game.picture} alt="Изображение игры"></img> */}
         </Grid>
       ))}
       {!hasGames && <Grid item xs={12}><Message>У вас нет ни одной игры. Попробуйте создать одну.</Message></Grid>}

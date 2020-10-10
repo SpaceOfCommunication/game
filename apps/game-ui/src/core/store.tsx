@@ -2,26 +2,34 @@ import React, { createContext, useContext } from 'react';
 import { getLocalDB } from './db';
 import { useLocalObservable } from 'mobx-react-lite'
 import { observable } from 'mobx';
-import { DocModel, Game, GameModel, Store } from './interfaces';
+import { DocModel, GameModel, Store } from './interfaces';
 
 function doc2model(doc: PouchDB.Core.ExistingDocument<DocModel>): GameModel {
-  return {
+  const gameModel: GameModel = {
     id: doc._id,
     title: doc.title,
-    picture: doc._attachments.img.data,
-    audio: doc._attachments.sfx.data,
+    screens: [],
+  };
+  for (let i = 0; i < Object.keys(doc._attachments).length / 2; i++) {
+    gameModel.screens.push({
+      picture: doc._attachments[`img-${i}`].data,
+      audio: doc._attachments[`sfx-${i}`].data,
+    })
   }
+  return gameModel;
 }
 
-function model2game(model: GameModel): Game {
-  const { id, title, picture, audio } = model;
-  return {
-    id,
-    title,
-    picture: URL.createObjectURL(picture),
-    audio: URL.createObjectURL(audio),
-  }
-}
+// function model2game(model: GameModel): Game {
+//   const { id, title, screens } = model;
+//   return {
+//     id,
+//     title,
+//     screens: screens.map(({ picture, audio }) => ({ 
+//       picture: URL.createObjectURL(picture),
+//       audio: URL.createObjectURL(audio),
+//     })),
+//   }
+// }
 
 function createStore() {
   const db = getLocalDB(); 
@@ -50,8 +58,8 @@ function createStore() {
 
     async initialize() {
       const gameModels = await store.fetchGameModels();
-      const games = gameModels.map(model2game);
-      store.games.replace(games);
+      // const games = gameModels.map(model2game);
+      store.games.replace(gameModels);
       store.isInitialized = true;
     }
   };
