@@ -30,7 +30,9 @@ export const GamesList: FC<GamesListProps> = observer((props) => {
       {hasGames && store.games.map((game) => (
         <Grid item xs={12} className={classes.gridItem} key={game.id}>
           <h2>{game.title}</h2>
-          <img src={URL.createObjectURL(game.screens[0].picture)} className={componentClasses.preview} alt="Превью игры"></img>
+          <Link to={`/game/${game.id}`} className={classes.link}>
+            <img src={URL.createObjectURL(game.screens[0].picture)} className={componentClasses.preview} alt="Превью игры"></img>
+          </Link>
         </Grid>
       ))}
       {!hasGames && <Grid item xs={12}><Message>У вас нет ни одной игры. Попробуйте создать одну.</Message></Grid>}

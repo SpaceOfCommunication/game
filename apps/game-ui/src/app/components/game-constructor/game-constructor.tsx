@@ -8,6 +8,7 @@ import { useCommonStyles } from '../../../core/styles';
 import GameConstructorEntry from '../game-contructor-entry/game-contructor-entry';
 import AddIcon from '@material-ui/icons/Add';
 import SaveIcon from '@material-ui/icons/Save';
+import { useHistory } from 'react-router-dom';
 
 export interface GameConstructorProps {
   game?: GameModel;
@@ -24,6 +25,7 @@ function isValidScreen(screen: GameScreenModelDraft) {
 
 export const GameConstructor: FC<GameConstructorProps> = (props) => {
   const { game } = props;
+  const history = useHistory();
   const classes = useCommonStyles();
   const store = useStore();
   const [screensState, setScreensState] = useState<GameScreenModelDraft[]>(game?.screens || []);
@@ -42,7 +44,7 @@ export const GameConstructor: FC<GameConstructorProps> = (props) => {
     setScreensState([...screensState]);
   }, [screensState]);
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     const hasEmptyFields = screensState.some((screen) => !isValidScreen(screen));
     if (hasEmptyFields) {
       setShowValidationState(true);
@@ -62,8 +64,9 @@ export const GameConstructor: FC<GameConstructorProps> = (props) => {
         data: audio
       };
     });
-    store.db.pouchDB.post<DocModel>({title: 'GameWithManyScreens', _attachments });
-  }, [screensState, setShowValidationState, store.db.pouchDB]);
+    await store.db.pouchDB.post<DocModel>({title: 'GameWithManyScreens', _attachments });
+    history.push('/')
+  }, [screensState, setShowValidationState, store.db.pouchDB, history]);
 
   return (
     <Grid container className={classes.gridRoot} justify="center" alignContent="center">

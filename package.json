@@ -34,6 +34,7 @@
     "document-register-element": "1.13.1",
     "express": "4.17.1",
     "express-winston": "^4.0.5",
+    "fontsource-roboto": "^3.0.3",
     "mobx": "^6.0.0",
     "mobx-react-lite": "^3.0.0",
     "pouchdb": "^7.2.2",

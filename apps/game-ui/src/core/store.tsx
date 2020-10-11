@@ -4,6 +4,9 @@ import { useLocalObservable } from 'mobx-react-lite'
 import { observable } from 'mobx';
 import { DocModel, GameModel, Store } from './interfaces';
 
+// eslint-disable-next-line @typescript-eslint/camelcase
+const POUCH_REQ_CONF = { include_docs: true, attachments: true, binary: true };
+
 function doc2model(doc: PouchDB.Core.ExistingDocument<DocModel>): GameModel {
   const gameModel: GameModel = {
     id: doc._id,
@@ -19,18 +22,6 @@ function doc2model(doc: PouchDB.Core.ExistingDocument<DocModel>): GameModel {
   return gameModel;
 }
 
-// function model2game(model: GameModel): Game {
-//   const { id, title, screens } = model;
-//   return {
-//     id,
-//     title,
-//     screens: screens.map(({ picture, audio }) => ({ 
-//       picture: URL.createObjectURL(picture),
-//       audio: URL.createObjectURL(audio),
-//     })),
-//   }
-// }
-
 function createStore() {
   const db = getLocalDB(); 
 
@@ -38,7 +29,7 @@ function createStore() {
     userName: undefined,
     isInitialized: false,
     db,
-    games: observable([]),
+    games: observable.array([], { deep: false, proxy: false }),
 
     get isAuthenticated() {
       return !!this.userName;
@@ -51,15 +42,20 @@ function createStore() {
 
     async fetchGameModels() {
       // eslint-disable-next-line @typescript-eslint/camelcase
-      const docs = await db.pouchDB.allDocs<DocModel>({ include_docs: true, attachments: true, binary: true });
+      const docs = await db.pouchDB.allDocs<DocModel>(POUCH_REQ_CONF);
       const models = docs.rows.map(({ doc}) => doc && doc2model(doc)).filter((model) => !!model) as GameModel[];
       return models;
     },
 
     async initialize() {
       const gameModels = await store.fetchGameModels();
-      // const games = gameModels.map(model2game);
       store.games.replace(gameModels);
+      store.db.pouchDB.changes<DocModel>({ since: 'now', live: true, ...POUCH_REQ_CONF}).on('change', (change) => {
+        if (change.doc) {
+          const model = doc2model(change.doc);
+          store.games.push(model);
+        }
+      })
       store.isInitialized = true;
     }
   };
