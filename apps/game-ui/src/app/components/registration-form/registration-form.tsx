@@ -1,6 +1,9 @@
 import { Button, FormControl, FormHelperText, Grid, Input, InputLabel, makeStyles } from '@material-ui/core';
+import { MessageService } from '../../../core/message-service';
 import React, { FC, useCallback, useState } from "react";
+import { useHistory } from 'react-router-dom';
 import { useCommonStyles } from '../../../core/styles';
+import { Auth } from 'apps/game-ui/src/core/auth';
 
 const useComponentStyles = makeStyles({
   form: {
@@ -17,13 +20,15 @@ const useComponentStyles = makeStyles({
 const RegistrationForm: FC = () => {
   const classes = useCommonStyles();
   const componentClasses = useComponentStyles();
+  const history = useHistory();
 
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [passwrodRepeat, setPasswordRepeat] = useState('');
   const fields = { login, password, passwrodRepeat };
   const [errors, setErrors] = useState({ login: '', password: '', passwrodRepeat: '' });
-  const onFormSubmit = useCallback(() => {
+
+  const onFormSubmit = useCallback(async () => {
     const errorMessages = {...errors};
     // EMPTY VALIDATION
     for(const field in errors) { 
@@ -34,8 +39,20 @@ const RegistrationForm: FC = () => {
     if (fields.password && fields.passwrodRepeat && fields.password !== fields.passwrodRepeat) {
       errorMessages.passwrodRepeat = 'Пароль не совпадает';
     }
-    setErrors(errorMessages)
-  }, [errors, setErrors, fields]);
+    setErrors(errorMessages);
+    if (Object.keys(errorMessages).some((key) => !!errorMessages[key])) {
+      return;
+    }
+    // SUBMITING THE FORM
+    const response = await Auth.signUp(fields.login, fields.password);
+    const messageService = MessageService.getInstance();
+    if (!response.ok) {
+      response.json().then((body) => messageService.showMessage({ message: body.message, status: 'error' }))
+      return;
+    }
+    messageService.showMessage({ message: 'Регистрация успешно завершена', status: 'success' });
+    history.push('/login');
+  }, [errors, setErrors, fields, history]);
 
   return (
     <Grid container justify="center" alignContent="center">
@@ -67,7 +84,6 @@ const RegistrationForm: FC = () => {
           <Button onClick={onFormSubmit} variant="contained" color="primary" size="large">Зарегистрироваться</Button>
         </FormControl>
       </form>
-
     </Grid>
   )
 }

@@ -1,6 +1,6 @@
-import { AppBar, Button, CssBaseline, makeStyles, Paper, Snackbar, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Button, CssBaseline, makeStyles, Snackbar, Toolbar, Typography } from '@material-ui/core';
 import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import './app.scss';
 
@@ -11,6 +11,9 @@ import { useCommonStyles } from '../core/styles';
 import GameOneCLick from './components/game-one-click/game-one-click';
 import LoginForm from './components/login-form/login-form';
 import RegistrationForm from './components/registration-form/registration-form';
+import SnackMessage from './components/snack-message/snack-message';
+import { observer } from 'mobx-react-lite';
+import { MessageService } from '../core/message-service';
 
 const useComponentStyles = makeStyles({
   navLink: {
@@ -21,9 +24,13 @@ const useComponentStyles = makeStyles({
   }
 });
 
-export const App = () => {
+export const App = observer(() => {
   const classes = useCommonStyles();
   const componentClasses = useComponentStyles();
+  const messageService = MessageService.getInstance();
+  const closeSnackBar = useCallback(() => {
+    messageService.clearMessage();
+  }, [messageService]);
 
   return (
     <>
@@ -64,14 +71,14 @@ export const App = () => {
                 <GamesList></GamesList>
               </Route>
             </Switch>
-            <Snackbar open={true} autoHideDuration={6000}>
-              <Paper elevation={3}>This is a success message!</Paper>
+            <Snackbar open={!!messageService.data} autoHideDuration={8000} onClose={closeSnackBar}>
+              <SnackMessage status={messageService.data?.status}>{messageService.data?.message}</SnackMessage>
             </Snackbar>
           </main>
         </Router>
-      </StoreProvider>1
+      </StoreProvider>
     </>
   );
-};
+});
 
 export default App;
