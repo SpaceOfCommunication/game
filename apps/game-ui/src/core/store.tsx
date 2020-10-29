@@ -1,8 +1,9 @@
 import React, { createContext, useContext } from 'react';
-import { getLocalDB } from './db';
+import { getLocalDB, getRemoteDB } from './db';
 import { useLocalObservable } from 'mobx-react-lite'
 import { observable } from 'mobx';
 import { DocModel, GameModel, Store } from './interfaces';
+import { Auth } from './auth';
 
 // eslint-disable-next-line @typescript-eslint/camelcase
 const POUCH_REQ_CONF = { include_docs: true, attachments: true, binary: true };
@@ -55,7 +56,15 @@ function createStore() {
           const model = doc2model(change.doc);
           store.games.push(model);
         }
-      })
+      });
+      const username = localStorage.getItem('userName');
+      if (username) {
+        const isAuthenticated = await Auth.isAuthenticated(username);
+        console.log(username, 'isAuthenticated')
+        if (isAuthenticated) {
+          store.db.syncWithRemoteDB(getRemoteDB(username));
+        }
+      }
       store.isInitialized = true;
     }
   };

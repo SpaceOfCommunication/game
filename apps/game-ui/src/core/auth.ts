@@ -1,5 +1,5 @@
 import { environment } from '../environments/environment';
-import { getRemoteDB } from './db';
+import { getRemoteDB, getRemoteDBTEST } from './db';
 
 
 export class Auth {
@@ -16,22 +16,22 @@ export class Auth {
 
   public static async login(username: string, password: string) {
     const pouchDB = getRemoteDB(username);
-    await pouchDB.logIn(username, password);
-    return pouchDB;
-    
-    // function (err, response) {
-    //   if (err) {
-    //     if (err.name === 'unauthorized' || err.name === 'forbidden') {
-    //       console.error("name or password incorrect")
-    //     } else {
-    //       console.error("cosmic rays, a meteor, etc.")
-    //     }
-    //   }
-    // }
+    const  response = await pouchDB.logIn(username, password);
+    return {response, pouchDB};
   }
 
   public static async logout(db: PouchDB.Database) {
     return db.logOut();
+  }
+
+  public static async isAuthenticated(username: string) {
+    const session = await getRemoteDBTEST().getSession();
+    return !!session.userCtx.name;
+  }
+
+  public static async getUserName(db: PouchDB.Database) {
+    const session = await db.getSession();
+    return session.userCtx.name;
   }
 
 }

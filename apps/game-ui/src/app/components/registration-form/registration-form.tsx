@@ -3,7 +3,7 @@ import { MessageService } from '../../../core/message-service';
 import React, { FC, useCallback, useState } from "react";
 import { useHistory } from 'react-router-dom';
 import { useCommonStyles } from '../../../core/styles';
-import { Auth } from 'apps/game-ui/src/core/auth';
+import { Auth } from '../../../core/auth';
 
 const useComponentStyles = makeStyles({
   form: {
