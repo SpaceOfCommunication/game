@@ -4,7 +4,7 @@ import { environment } from '../environments/environment';
 
 PouchDB.plugin(PouchAuthentication);
 
-  // eslint-disable-next-line @typescript-eslint/camelcase
+// eslint-disable-next-line @typescript-eslint/camelcase
 const pouchConfig = { skip_setup: false, auto_compaction: true };
 
 export function getLocalDB() {
@@ -18,24 +18,26 @@ export function getRemoteDB(userName: string) {
 
 export function getRemoteDBTEST() {
   return new PouchDB(`${environment.pouchURL}`, pouchConfig);
-} 
+}
 
 function hexEncode(text: string) {
-  let hex: string;
-  let result = "";
+  let hex = '';
   for (let i = 0; i < text.length; i++) {
-    hex = text.charCodeAt(i).toString(16);
-    result += ("000" + hex).slice(-4);
+    hex += text.charCodeAt(i).toString(16);
   }
-  return result;
+  return hex
 }
 
 export class DB {
-  
-  constructor(public pouchDB: PouchDB.Database) {}
+
+  constructor(public pouchDB: PouchDB.Database) { }
 
   public syncWithRemoteDB(remotePouchDB: PouchDB.Database) {
-    this.pouchDB.sync(remotePouchDB, {live: true, retry: true});
+    this.pouchDB.replicate.from(remotePouchDB).on('complete', () => {
+      this.pouchDB.sync(remotePouchDB, { live: true, retry: false });
+    }).on('error', (err) => {
+      console.error('ERROR', err);
+    });
   }
 
 }

@@ -60,8 +60,8 @@ function createStore() {
       const username = localStorage.getItem('userName');
       if (username) {
         const isAuthenticated = await Auth.isAuthenticated(username);
-        console.log(username, 'isAuthenticated')
         if (isAuthenticated) {
+          console.log(username, 'isAuthenticated')
           store.db.syncWithRemoteDB(getRemoteDB(username));
         }
       }
