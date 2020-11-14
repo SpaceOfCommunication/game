@@ -1,17 +1,18 @@
 /* eslint-disable @typescript-eslint/camelcase */
-import { Button, Grid } from '@material-ui/core';
+import { Button, TextField } from '@material-ui/core';
 import { useStore } from '../../../core/store';
-import React, { FC, useCallback, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import Message from '../ui/message';
 import { DocModel, GameModel } from '../../../core/interfaces';
-import { useCommonStyles } from '../../../core/styles';
 import GameConstructorEntry from '../game-contructor-entry/game-contructor-entry';
 import AddIcon from '@material-ui/icons/Add';
 import SaveIcon from '@material-ui/icons/Save';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
+import { useGameConstructorStyles } from './game-constructor.styles';
+import { observer } from 'mobx-react-lite';
 
-export interface GameConstructorProps {
-  game?: GameModel;
+export interface GameConstructorRouterParams {
+  id?: string;
 }
 
 interface GameScreenModelDraft {
@@ -23,20 +24,30 @@ function isValidScreen(screen: GameScreenModelDraft) {
   return screen.picture && screen.audio;
 }
 
-export const GameConstructor: FC<GameConstructorProps> = (props) => {
-  const { game } = props;
-  const history = useHistory();
-  const classes = useCommonStyles();
+const DEFAULT_MELODY_DURATION = 15;
+
+export const GameConstructor: FC = observer(() => {
   const store = useStore();
-  const [screensState, setScreensState] = useState<GameScreenModelDraft[]>(game?.screens || []);
+  const { id } = useParams<GameConstructorRouterParams>();
+  const history = useHistory();
+  const componentClasses = useGameConstructorStyles();
+  const [screensState, setScreensState] = useState<GameScreenModelDraft[]>([{}]);
   const [showValidationState, setShowValidationState] = useState(false);
-  const [isFormDisabled, setIsFormDisabled] = useState(!game?.screens.length);
+  const [isFormDisabled, setIsFormDisabled] = useState(true);
+  const [melodyDuration, setMelodyDuration] = useState(DEFAULT_MELODY_DURATION);
+  const [gameTitle, setGameTitle] = useState<string>();
+  const game = id ? store.games.find((game) => game.id === id) : undefined;
+
+  useEffect(() => {
+    if (game) {
+      setScreensState([...game?.screens]);
+    }
+  }, [setScreensState, game]);
 
   const handleEntryAdd = useCallback(() => {
     setScreensState([...screensState, {}]);
     setIsFormDisabled(false);
   }, [screensState, setScreensState, setIsFormDisabled]);
-
 
   const handleEntryChange = useCallback((screen: GameScreenModelDraft, picture?: Blob, audio?: Blob) => {
     screen.picture = picture;
@@ -64,35 +75,43 @@ export const GameConstructor: FC<GameConstructorProps> = (props) => {
         data: audio
       };
     });
-    await store.db.pouchDB.post<DocModel>({title: 'GameWithManyScreens', _attachments });
+    await store.db.pouchDB.post<DocModel>({ title: 'GameWithManyScreens', _attachments });
     history.push('/')
   }, [screensState, setShowValidationState, store.db.pouchDB, history]);
 
   return (
-    <Grid container className={classes.gridRoot} justify="center" alignContent="center">
-      <Grid item xs={12}>
-        <Message>Для создания игры загрузите картинку <span role="img" aria-label="иконка картинки">🖼 </span>
+    <div className={componentClasses.wrapper}>
+      <div className={componentClasses.header}>
+        <h1>Новая игра</h1>
+      </div>
+      <Message>Придумайте название игры и введите базовые натройки</Message>
+      <div className={componentClasses.textInputBlock}>
+        <TextField className={componentClasses.textInput} value={gameTitle} 
+          onChange={e => setGameTitle(e.target.value)} label="Название игры" />
+        <TextField className={componentClasses.textInput} type="number" value={melodyDuration} 
+          onChange={e => setMelodyDuration(+e.target.value)} label="Длительность мелодии (секунд)" />
+      </div>
+      <Message>Для создания игрового экрана загрузите картинку <span role="img" aria-label="иконка картинки">🖼 </span>
         и мелодию <span role="img" aria-label="иконка мелодии">🎶</span></Message>
-      </Grid>
-      {screensState.map((screen) => (
-        <GameConstructorEntry
-          onEntryChange={handleEntryChange.bind(undefined, screen)}
-          highlightEmpty={showValidationState && !isValidScreen(screen)}
-          {...screen}>
-        </GameConstructorEntry>
-      ))}
-      <Grid item xs={6} className={classes.gridItem}>
+      <div>
+        {screensState.map((screen, i) => (
+          <GameConstructorEntry
+            onEntryChange={handleEntryChange.bind(undefined, screen)}
+            highlightEmpty={showValidationState && !isValidScreen(screen)}
+            {...screen}>
+          </GameConstructorEntry>
+        ))}
+      </div>
+      <div className={componentClasses.buttons}>
         <Button onClick={handleEntryAdd} variant="contained" color="primary" size="large" startIcon={<AddIcon />}>
           Добавить игровой экран
         </Button>
-      </Grid>
-      <Grid item xs={6} className={classes.gridItem}>
         <Button disabled={isFormDisabled} onClick={handleSave} variant="contained" color="secondary" size="large" startIcon={<SaveIcon />}>
           Сохранить игру
         </Button>
-      </Grid>
-    </Grid>
+      </div>
+    </div>
   )
-};
+});
 
 export default GameConstructor

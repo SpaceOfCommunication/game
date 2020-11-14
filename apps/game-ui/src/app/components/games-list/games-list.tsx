@@ -26,7 +26,7 @@ export const GamesList: FC<GamesListProps> = observer((props) => {
   return (
     <div className={componentClasses.gameList}>
       {hasGames && store.games.map((game) => (
-        <div className={componentClasses.gameBlock}>
+        <div key={game.id} className={componentClasses.gameBlock}>
           <div className={componentClasses.gameBlockInner}>
             <Link to={`/game/${game.id}`} className={`${componentClasses.contentWrapper} ${classes.link}`}>
               <h2>{game.title}</h2>
@@ -38,7 +38,9 @@ export const GamesList: FC<GamesListProps> = observer((props) => {
               </div>
             </Link>
             <div className={componentClasses.buttons}>
-              <Button color="primary" startIcon={<CreateIcon />}>Редактировать</Button>
+              <Link to={`/create-game/${game.id}`} className={classes.link}>
+                <Button color="primary" startIcon={<CreateIcon />}>Редактировать</Button>
+              </Link>
               <Button color="secondary" startIcon={<DeleteForeverIcon />}>Удалить</Button>
             </div>
           </div>

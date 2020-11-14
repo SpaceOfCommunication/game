@@ -61,7 +61,7 @@ export const App = observer(() => {
               <Route path="/registration">
                 <RegistrationForm></RegistrationForm>
               </Route>
-              <Route path="/create-game">
+              <Route path="/create-game/:id?">
                 <GameConstructor></GameConstructor>
               </Route>
               <Route path="/game/:id">

@@ -3,6 +3,7 @@ import React, { FC, useState, useCallback } from 'react';
 import { useCommonStyles } from '../../../core/styles';
 import nopicture from '../../../assets/no-picture.png';
 import FilePicker from '../ui/file-picker';
+import AudioPlayer from '../audio-player/audio-player';
 
 
 const useStyles = makeStyles({
@@ -10,7 +11,9 @@ const useStyles = makeStyles({
     display: 'flex',
   },
   previewImage: {
-    maxWidth: '100px',
+    maxWidth: '150px',
+    padding: '10px',
+    borderRadius: '20px',
   },
   fileSelectionBlock: {
     display: 'flex',
@@ -34,7 +37,8 @@ export interface GameConstructorEntryProps {
 };
 
 const GameConstructorEntry: FC<GameConstructorEntryProps> = (props) => {
-  const { highlightEmpty, onEntryChange } = props;
+  const { highlightEmpty, onEntryChange, picture, audio } = props;
+
   const classes = useCommonStyles();
   const componentClasses = useStyles();
   const [formState, setFormState] = useState<FormState>({ picture: undefined, audio: undefined });
@@ -61,11 +65,12 @@ const GameConstructorEntry: FC<GameConstructorEntryProps> = (props) => {
   if (highlightEmpty) {
     inputBlockClasses = `${inputBlockClasses} ${componentClasses.emptyField}`;
   }
+  console.log(picture, audio)
 
   return (
     <Grid container className={classes.gridRoot} justify="center" alignContent="center">
       <Grid item xs={6} className={inputBlockClasses}>
-        <img src={nopicture} className={componentClasses.previewImage} alt="Пустое изображение"></img>
+        <img src={(picture && URL.createObjectURL(picture)) || nopicture} className={componentClasses.previewImage} alt="Пустое изображение"></img>
         <FormControl className={componentClasses.fileSelectionBlock}>
           <FilePicker onFileSelection={handlePictureSelection} accept="image/png, image/jpeg" ariaDescribedby="Поле выбора файла изображения"></FilePicker>
           <FormHelperText id="my-helper-text">
@@ -74,6 +79,7 @@ const GameConstructorEntry: FC<GameConstructorEntryProps> = (props) => {
         </FormControl>
       </Grid>
       <Grid item xs={6} className={inputBlockClasses}>
+        {audio && <AudioPlayer audioSource={audio}></AudioPlayer>}
         <FormControl className={componentClasses.fileSelectionBlock}>
           <FilePicker onFileSelection={handleAudioSelection} accept="audio/*" ariaDescribedby="Поле выбора аудио файла"></FilePicker>
           <FormHelperText id="my-helper-text">

@@ -12,17 +12,6 @@ export interface GameModel {
   screens: GameScreenModel[];
 }
 
-// export interface GameScreen {
-//   picture: string;
-//   audio: string
-// }
-
-// export interface Game {
-//   id: string;
-//   title: string;
-//   screens: GameScreen[];
-// }
-
 export interface Store {
   userName?: string;
   db: DB;
