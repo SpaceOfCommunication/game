@@ -13,6 +13,7 @@ function doc2model(doc: PouchDB.Core.ExistingDocument<DocModel>): GameModel {
     id: doc._id,
     title: doc.title,
     screens: [],
+    audioDuration: doc.audioDuration,
   };
   for (let i = 0; i < Object.keys(doc._attachments).length / 2; i++) {
     gameModel.screens.push({

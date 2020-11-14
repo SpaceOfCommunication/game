@@ -9,6 +9,7 @@ export interface GameScreenModel {
 export interface GameModel {
   id: string;
   title: string;
+  audioDuration: number;
   screens: GameScreenModel[];
 }
 
@@ -30,6 +31,7 @@ export interface DocAttachment {
 
 export interface DocModel {
   title: string;
+  audioDuration: number;
   _attachments: {
     [key: string]: DocAttachment,
   }

@@ -1,1 +1,2 @@
-export const ONE_CLICK_TARGET_SIZE = 50
+export const ONE_CLICK_TARGET_SIZE = 50;
+export const DEFAULT_MELODY_DURATION = 15;

@@ -3,7 +3,8 @@ import { Button, TextField } from '@material-ui/core';
 import { useStore } from '../../../core/store';
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import Message from '../ui/message';
-import { DocModel, GameModel } from '../../../core/interfaces';
+import { DocModel } from '../../../core/interfaces';
+import { DEFAULT_MELODY_DURATION } from '../../../core/constants';
 import GameConstructorEntry from '../game-contructor-entry/game-contructor-entry';
 import AddIcon from '@material-ui/icons/Add';
 import SaveIcon from '@material-ui/icons/Save';
@@ -24,7 +25,7 @@ function isValidScreen(screen: GameScreenModelDraft) {
   return screen.picture && screen.audio;
 }
 
-const DEFAULT_MELODY_DURATION = 15;
+const DEFAULT_TITLE = 'Моя новая игра';
 
 export const GameConstructor: FC = observer(() => {
   const store = useStore();
@@ -35,12 +36,14 @@ export const GameConstructor: FC = observer(() => {
   const [showValidationState, setShowValidationState] = useState(false);
   const [isFormDisabled, setIsFormDisabled] = useState(true);
   const [melodyDuration, setMelodyDuration] = useState(DEFAULT_MELODY_DURATION);
-  const [gameTitle, setGameTitle] = useState<string>();
+  const [gameTitle, setGameTitle] = useState<string>(DEFAULT_TITLE);
   const game = id ? store.games.find((game) => game.id === id) : undefined;
 
   useEffect(() => {
     if (game) {
       setScreensState([...game?.screens]);
+      setGameTitle(game.title);
+      setMelodyDuration(game.audioDuration);
     }
   }, [setScreensState, game]);
 
@@ -75,9 +78,9 @@ export const GameConstructor: FC = observer(() => {
         data: audio
       };
     });
-    await store.db.pouchDB.post<DocModel>({ title: 'GameWithManyScreens', _attachments });
+    await store.db.pouchDB.post<DocModel>({ title: gameTitle, audioDuration: melodyDuration, _attachments });
     history.push('/')
-  }, [screensState, setShowValidationState, store.db.pouchDB, history]);
+  }, [screensState, setShowValidationState, store.db.pouchDB, history, gameTitle, melodyDuration]);
 
   return (
     <div className={componentClasses.wrapper}>
@@ -86,10 +89,10 @@ export const GameConstructor: FC = observer(() => {
       </div>
       <Message>Придумайте название игры и введите базовые натройки</Message>
       <div className={componentClasses.textInputBlock}>
-        <TextField className={componentClasses.textInput} value={gameTitle} 
-          onChange={e => setGameTitle(e.target.value)} label="Название игры" />
-        <TextField className={componentClasses.textInput} type="number" value={melodyDuration} 
-          onChange={e => setMelodyDuration(+e.target.value)} label="Длительность мелодии (секунд)" />
+        <TextField className={componentClasses.textInput} value={gameTitle} defaultValue={DEFAULT_TITLE}
+          onChange={e => setGameTitle(e.target.value)} label="Название игры" variant="outlined"/>
+        <TextField className={componentClasses.textInput} type="number" value={melodyDuration} InputLabelProps={{ shrink: true }}
+          onChange={e => setMelodyDuration(+e.target.value)} label="Длительность мелодии (секунд)" variant="outlined"/>
       </div>
       <Message>Для создания игрового экрана загрузите картинку <span role="img" aria-label="иконка картинки">🖼 </span>
         и мелодию <span role="img" aria-label="иконка мелодии">🎶</span></Message>

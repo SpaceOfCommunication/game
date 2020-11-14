@@ -7,6 +7,11 @@ import AudioPlayer from '../audio-player/audio-player';
 
 
 const useStyles = makeStyles({
+  entryWrapper: {
+    border: '1px solid #bdbdbd',
+    borderRadius: '10px',
+    margin: '20px',
+  },
   inputBlock: {
     display: 'flex',
   },
@@ -68,7 +73,7 @@ const GameConstructorEntry: FC<GameConstructorEntryProps> = (props) => {
   console.log(picture, audio)
 
   return (
-    <Grid container className={classes.gridRoot} justify="center" alignContent="center">
+    <Grid container className={`${classes.gridRoot} ${componentClasses.entryWrapper}`} justify="center" alignContent="center">
       <Grid item xs={6} className={inputBlockClasses}>
         <img src={(picture && URL.createObjectURL(picture)) || nopicture} className={componentClasses.previewImage} alt="Пустое изображение"></img>
         <FormControl className={componentClasses.fileSelectionBlock}>
