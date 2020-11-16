@@ -11,6 +11,7 @@ const POUCH_REQ_CONF = { include_docs: true, attachments: true, binary: true };
 function doc2model(doc: PouchDB.Core.ExistingDocument<DocModel>): GameModel {
   const gameModel: GameModel = {
     id: doc._id,
+    rev: doc._rev,
     title: doc.title,
     screens: [],
     audioDuration: doc.audioDuration,
@@ -55,7 +56,12 @@ function createStore() {
       store.db.pouchDB.changes<DocModel>({ since: 'now', live: true, ...POUCH_REQ_CONF}).on('change', (change) => {
         if (change.doc) {
           const model = doc2model(change.doc);
-          store.games.push(model);
+          const idx = store.games.findIndex((game) => game.id === model.id);
+          if (idx >= 0) {
+            store.games.spliceWithArray(idx, 1, [model]);
+          } else {
+            store.games.push(model);
+          }
         }
       });
       const username = localStorage.getItem('userName');

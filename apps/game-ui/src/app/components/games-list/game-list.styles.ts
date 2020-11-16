@@ -14,6 +14,7 @@ export const useGameListStyles = makeStyles({
     display: 'flex',
     flexWrap: 'wrap',
     padding: '30px',
+    width: '100%',
   },
   gameBlock: {
     display: 'flex',

@@ -1,9 +1,10 @@
-import { FormControl, FormHelperText, Grid, makeStyles } from '@material-ui/core';
+import { Button, FormControl, FormHelperText, Grid, makeStyles } from '@material-ui/core';
 import React, { FC, useState, useCallback } from 'react';
 import { useCommonStyles } from '../../../core/styles';
 import nopicture from '../../../assets/no-picture.png';
 import FilePicker from '../ui/file-picker';
 import AudioPlayer from '../audio-player/audio-player';
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 
 
 const useStyles = makeStyles({
@@ -11,6 +12,7 @@ const useStyles = makeStyles({
     border: '1px solid #bdbdbd',
     borderRadius: '10px',
     margin: '20px',
+    alignItems: 'center',
   },
   inputBlock: {
     display: 'flex',
@@ -26,6 +28,10 @@ const useStyles = makeStyles({
   },
   emptyField: {
     border: '2px solid red',
+  },
+  deleteIcon: {
+    width: '30px',
+    height: '30px',
   }
 });
 
@@ -39,10 +45,11 @@ export interface GameConstructorEntryProps {
   picture?: Blob,
   audio?: Blob,
   onEntryChange?: (picture?: Blob, audio?: Blob) => void,
+  onDelete?: () => void
 };
 
 const GameConstructorEntry: FC<GameConstructorEntryProps> = (props) => {
-  const { highlightEmpty, onEntryChange, picture, audio } = props;
+  const { highlightEmpty, onEntryChange, picture, audio, onDelete } = props;
 
   const classes = useCommonStyles();
   const componentClasses = useStyles();
@@ -70,11 +77,10 @@ const GameConstructorEntry: FC<GameConstructorEntryProps> = (props) => {
   if (highlightEmpty) {
     inputBlockClasses = `${inputBlockClasses} ${componentClasses.emptyField}`;
   }
-  console.log(picture, audio)
 
   return (
     <Grid container className={`${classes.gridRoot} ${componentClasses.entryWrapper}`} justify="center" alignContent="center">
-      <Grid item xs={6} className={inputBlockClasses}>
+      <Grid item xs={5} className={inputBlockClasses}>
         <img src={(picture && URL.createObjectURL(picture)) || nopicture} className={componentClasses.previewImage} alt="Пустое изображение"></img>
         <FormControl className={componentClasses.fileSelectionBlock}>
           <FilePicker onFileSelection={handlePictureSelection} accept="image/png, image/jpeg" ariaDescribedby="Поле выбора файла изображения"></FilePicker>
@@ -83,7 +89,7 @@ const GameConstructorEntry: FC<GameConstructorEntryProps> = (props) => {
           </FormHelperText>
         </FormControl>
       </Grid>
-      <Grid item xs={6} className={inputBlockClasses}>
+      <Grid item xs={5} className={inputBlockClasses}>
         {audio && <AudioPlayer audioSource={audio}></AudioPlayer>}
         <FormControl className={componentClasses.fileSelectionBlock}>
           <FilePicker onFileSelection={handleAudioSelection} accept="audio/*" ariaDescribedby="Поле выбора аудио файла"></FilePicker>
@@ -91,6 +97,9 @@ const GameConstructorEntry: FC<GameConstructorEntryProps> = (props) => {
             Выберите мелодию <span role="img" aria-label="иконка мелодии">🎶</span> на своем компьютере
           </FormHelperText>
         </FormControl>
+      </Grid>
+      <Grid item xs={2} className={inputBlockClasses}>
+        <Button onClick={() => onDelete && onDelete()} variant="contained" color="secondary" startIcon={<DeleteForeverIcon />}>Удалить</Button>
       </Grid>
     </Grid>
   );

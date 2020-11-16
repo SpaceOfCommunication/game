@@ -11,6 +11,7 @@ import SaveIcon from '@material-ui/icons/Save';
 import { useHistory, useParams } from 'react-router-dom';
 import { useGameConstructorStyles } from './game-constructor.styles';
 import { observer } from 'mobx-react-lite';
+import { MessageService } from '../../../core/message-service';
 
 export interface GameConstructorRouterParams {
   id?: string;
@@ -34,7 +35,6 @@ export const GameConstructor: FC = observer(() => {
   const componentClasses = useGameConstructorStyles();
   const [screensState, setScreensState] = useState<GameScreenModelDraft[]>([{}]);
   const [showValidationState, setShowValidationState] = useState(false);
-  const [isFormDisabled, setIsFormDisabled] = useState(true);
   const [melodyDuration, setMelodyDuration] = useState(DEFAULT_MELODY_DURATION);
   const [gameTitle, setGameTitle] = useState<string>(DEFAULT_TITLE);
   const game = id ? store.games.find((game) => game.id === id) : undefined;
@@ -43,19 +43,22 @@ export const GameConstructor: FC = observer(() => {
     if (game) {
       setScreensState([...game?.screens]);
       setGameTitle(game.title);
-      setMelodyDuration(game.audioDuration);
+      setMelodyDuration(game.audioDuration || DEFAULT_MELODY_DURATION);
     }
   }, [setScreensState, game]);
 
   const handleEntryAdd = useCallback(() => {
     setScreensState([...screensState, {}]);
-    setIsFormDisabled(false);
-  }, [screensState, setScreensState, setIsFormDisabled]);
+  }, [screensState, setScreensState]);
 
   const handleEntryChange = useCallback((screen: GameScreenModelDraft, picture?: Blob, audio?: Blob) => {
     screen.picture = picture;
     screen.audio = audio;
     setScreensState([...screensState]);
+  }, [screensState]);
+
+  const handleEntryDelete = useCallback((screen: GameScreenModelDraft) => {
+    setScreensState([...screensState.filter((ss) => ss !== screen)]);
   }, [screensState]);
 
   const handleSave = useCallback(async () => {
@@ -78,18 +81,24 @@ export const GameConstructor: FC = observer(() => {
         data: audio
       };
     });
-    await store.db.pouchDB.post<DocModel>({ title: gameTitle, audioDuration: melodyDuration, _attachments });
+    const docModel : DocModel = { title: gameTitle, audioDuration: melodyDuration, _attachments };
+    if (game) {
+      await store.db.pouchDB.put<DocModel>({ _id: game.id, _rev: game.rev, ...docModel}, { force: true });
+    } else {
+      await store.db.pouchDB.post<DocModel>(docModel);
+    }
+    MessageService.getInstance().showMessage({ message: `Игра успешно ${game ? 'сохранена' : 'создана'}`, status: 'success' });
     history.push('/')
-  }, [screensState, setShowValidationState, store.db.pouchDB, history, gameTitle, melodyDuration]);
+  }, [screensState, setShowValidationState, store.db.pouchDB, history, gameTitle, melodyDuration, game]);
 
   return (
     <div className={componentClasses.wrapper}>
       <div className={componentClasses.header}>
-        <h1>Новая игра</h1>
+      <h1>{game ? 'Редактировать игру' : 'Создание новой игры'}</h1>
       </div>
       <Message>Придумайте название игры и введите базовые натройки</Message>
       <div className={componentClasses.textInputBlock}>
-        <TextField className={componentClasses.textInput} value={gameTitle} defaultValue={DEFAULT_TITLE}
+        <TextField className={componentClasses.textInput} value={gameTitle}
           onChange={e => setGameTitle(e.target.value)} label="Название игры" variant="outlined"/>
         <TextField className={componentClasses.textInput} type="number" value={melodyDuration} InputLabelProps={{ shrink: true }}
           onChange={e => setMelodyDuration(+e.target.value)} label="Длительность мелодии (секунд)" variant="outlined"/>
@@ -100,6 +109,7 @@ export const GameConstructor: FC = observer(() => {
         {screensState.map((screen, i) => (
           <GameConstructorEntry
             onEntryChange={handleEntryChange.bind(undefined, screen)}
+            onDelete={handleEntryDelete.bind(undefined, screen)}
             highlightEmpty={showValidationState && !isValidScreen(screen)}
             {...screen}>
           </GameConstructorEntry>
@@ -109,7 +119,7 @@ export const GameConstructor: FC = observer(() => {
         <Button onClick={handleEntryAdd} variant="contained" color="primary" size="large" startIcon={<AddIcon />}>
           Добавить игровой экран
         </Button>
-        <Button disabled={isFormDisabled} onClick={handleSave} variant="contained" color="secondary" size="large" startIcon={<SaveIcon />}>
+        <Button onClick={handleSave} variant="contained" color="secondary" size="large" startIcon={<SaveIcon />}>
           Сохранить игру
         </Button>
       </div>

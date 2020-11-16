@@ -8,6 +8,7 @@ export interface GameScreenModel {
 
 export interface GameModel {
   id: string;
+  rev: string;
   title: string;
   audioDuration: number;
   screens: GameScreenModel[];

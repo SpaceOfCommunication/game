@@ -25,7 +25,9 @@
     "dep-graph": "nx dep-graph",
     "help": "nx help",
     "start:be": "nx serve game-server",
-    "build:be": "nx build game-server"
+    "build:be": "nx build game-server",
+    "deploy": "firebase deploy",
+    "firebase:deploy": "nx build && firebase deploy"
   },
   "private": true,
   "dependencies": {

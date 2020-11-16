@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import StopIcon from '@material-ui/icons/Stop';
-import { makeStyles } from '@material-ui/core';
+import { IconButton, makeStyles } from '@material-ui/core';
 
 export interface AudioPlayerProps {
   audioSource: Blob,
@@ -33,7 +33,9 @@ export const AudioPlayer: FC<AudioPlayerProps> = (props) => {
 
   return (
     <div>
-      <PlyaerIcon onClick={() => setPlaying(!playing)} className={classes.playerIcon}></PlyaerIcon>
+      <IconButton onClick={() => setPlaying(!playing)} color="primary" aria-label="player-toggler" component="span">
+        <PlyaerIcon className={classes.playerIcon}></PlyaerIcon>
+      </IconButton>
     </div>
   )
 };
