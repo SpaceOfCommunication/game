@@ -14,6 +14,8 @@ import RegistrationForm from './components/registration-form/registration-form';
 import SnackMessage from './components/snack-message/snack-message';
 import { observer } from 'mobx-react-lite';
 import { MessageService } from '../core/message-service';
+import DialogConfirm from './components/dialog-confirm/dialog-confirm';
+import { DialogService } from '../core/dialog-service';
 
 const useComponentStyles = makeStyles({
   navLink: {
@@ -28,6 +30,7 @@ export const App = observer(() => {
   const classes = useCommonStyles();
   const componentClasses = useComponentStyles();
   const messageService = MessageService.getInstance();
+  const dialogService = DialogService.getInstance();
   const closeSnackBar = useCallback(() => {
     messageService.clearMessage();
   }, [messageService]);
@@ -74,6 +77,8 @@ export const App = observer(() => {
             <Snackbar open={!!messageService.data} autoHideDuration={8000} onClose={closeSnackBar}>
               <SnackMessage status={messageService.data?.status}>{messageService.data?.message}</SnackMessage>
             </Snackbar>
+            <DialogConfirm title={dialogService.data?.title} message={dialogService.data?.message} 
+              onClose={dialogService.data?.onClose} onConfim={dialogService.data?.onConfim}></DialogConfirm>
           </main>
         </Router>
       </StoreProvider>

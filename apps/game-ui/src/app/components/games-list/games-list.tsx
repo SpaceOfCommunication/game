@@ -1,6 +1,6 @@
 import { Button } from '@material-ui/core';
 import { observer } from 'mobx-react-lite';
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import CreateIcon from '@material-ui/icons/Create';
@@ -10,6 +10,8 @@ import { useCommonStyles } from '../../../core/styles';
 
 import { useStore } from '../../../core/store';
 import { useGameListStyles } from './game-list.styles';
+import { DialogService } from '../../../core/dialog-service';
+import { GameModel } from '../../../core/interfaces';
 
 export interface GamesListProps {
   onCreateNewGame?: () => void
@@ -20,6 +22,16 @@ export const GamesList: FC<GamesListProps> = observer((props) => {
   const classes = useCommonStyles();
   const componentClasses = useGameListStyles();
   const history = useHistory();
+  
+  const showDeleteDialog = useCallback((game: GameModel) => {
+    const dialog = DialogService.getInstance();
+    dialog.showDialog({
+      title: `Удаление игры ${game.title}`,
+      message: `Вы действительно хотите удалить игру ${game.title}`,
+      onClose: () => dialog.closeDialog(),
+      onConfim: () => store.db.pouchDB.remove(game.id, game.rev).then(() => dialog.closeDialog())
+    });
+  }, [store.db.pouchDB]);
 
   const hasGames = store.games.length > 0;
 
@@ -41,7 +53,7 @@ export const GamesList: FC<GamesListProps> = observer((props) => {
               <Link to={`/create-game/${game.id}`} className={classes.link}>
                 <Button color="primary" startIcon={<CreateIcon />}>Редактировать</Button>
               </Link>
-              <Button color="secondary" startIcon={<DeleteForeverIcon />}>Удалить</Button>
+              <Button onClick={showDeleteDialog.bind(undefined, game)} color="secondary" startIcon={<DeleteForeverIcon />}>Удалить</Button>
             </div>
           </div>
         </div>

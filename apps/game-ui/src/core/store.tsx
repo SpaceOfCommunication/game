@@ -54,7 +54,12 @@ function createStore() {
       const gameModels = await store.fetchGameModels();
       store.games.replace(gameModels);
       store.db.pouchDB.changes<DocModel>({ since: 'now', live: true, ...POUCH_REQ_CONF}).on('change', (change) => {
-        if (change.doc) {
+        if (change.deleted) {
+          const game = store.games.find((game) => game.id === change.id);
+          if (game) {
+            store.games.remove(game);
+          }
+        } else if (change.doc) {
           const model = doc2model(change.doc);
           const idx = store.games.findIndex((game) => game.id === model.id);
           if (idx >= 0) {
