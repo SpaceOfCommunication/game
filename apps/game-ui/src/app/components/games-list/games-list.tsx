@@ -12,6 +12,7 @@ import { useStore } from '../../../core/store';
 import { useGameListStyles } from './game-list.styles';
 import { DialogService } from '../../../core/dialog-service';
 import { GameModel } from '../../../core/interfaces';
+import { MessageService } from '../../../core/message-service';
 
 export interface GamesListProps {
   onCreateNewGame?: () => void
@@ -29,7 +30,15 @@ export const GamesList: FC<GamesListProps> = observer((props) => {
       title: `Удаление игры ${game.title}`,
       message: `Вы действительно хотите удалить игру "${game.title}"?`,
       onClose: () => dialog.closeDialog(),
-      onConfim: () => store.db.pouchDB.remove(game.id, game.rev).then(() => dialog.closeDialog())
+      onConfim: async() => {
+        try {
+          await store.db.pouchDB.remove(game.id, game.rev);
+          dialog.closeDialog();
+          MessageService.getInstance().showMessage({ message: `Игра "${game.title}" удалена`, status: 'success' });
+        } catch (err) {
+          MessageService.getInstance().showMessage({ message: `Не удалось удалить игру "${game.title}"`, status: 'error' });
+        }
+      }
     });
   }, [store.db.pouchDB]);
 

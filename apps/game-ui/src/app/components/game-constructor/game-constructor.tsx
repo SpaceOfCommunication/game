@@ -40,11 +40,9 @@ export const GameConstructor: FC = observer(() => {
   const game = id ? store.games.find((game) => game.id === id) : undefined;
 
   useEffect(() => {
-    if (game) {
-      setScreensState([...game?.screens]);
-      setGameTitle(game.title);
-      setMelodyDuration(game.audioDuration || DEFAULT_MELODY_DURATION);
-    }
+    setScreensState(game?.screens ? [...game?.screens] : []);
+    setGameTitle(game?.title || DEFAULT_TITLE);
+    setMelodyDuration(game?.audioDuration || DEFAULT_MELODY_DURATION);
   }, [setScreensState, game]);
 
   const handleEntryAdd = useCallback(() => {
@@ -82,12 +80,16 @@ export const GameConstructor: FC = observer(() => {
       };
     });
     const docModel : DocModel = { title: gameTitle, audioDuration: melodyDuration, _attachments };
-    if (game) {
-      await store.db.pouchDB.put<DocModel>({ _id: game.id, _rev: game.rev, ...docModel}, { force: true });
-    } else {
-      await store.db.pouchDB.post<DocModel>(docModel);
+    try {
+      if (game) {
+        await store.db.pouchDB.put<DocModel>({ _id: game.id, _rev: game.rev, ...docModel}, { force: true });
+      } else {
+        await store.db.pouchDB.post<DocModel>(docModel);
+      }
+      MessageService.getInstance().showMessage({ message: `Игра успешно ${game ? 'сохранена' : 'создана'}`, status: 'success' });
+    } catch(err) {
+      MessageService.getInstance().showMessage({ message: 'При создании игры произошла ошибка. Попробуйте еще раз', status: 'error' });
     }
-    MessageService.getInstance().showMessage({ message: `Игра успешно ${game ? 'сохранена' : 'создана'}`, status: 'success' });
     history.push('/')
   }, [screensState, setShowValidationState, store.db.pouchDB, history, gameTitle, melodyDuration, game]);
 

@@ -1,10 +1,11 @@
-import { Button, FormControl, FormHelperText, Grid, Input, InputLabel, makeStyles } from '@material-ui/core';
+import { Button, FormControl, FormHelperText, Input, InputLabel, makeStyles } from '@material-ui/core';
 import { Auth } from '../../../core/auth';
 import React, { FC, useCallback, useState } from "react";
 import { useCommonStyles } from '../../../core/styles';
 import { useStore } from '../../../core/store';
 import { observer } from 'mobx-react-lite';
 import { MessageService } from '../../../core/message-service';
+import { Link } from 'react-router-dom';
 
 const useComponentStyles = makeStyles({
   form: {
@@ -15,6 +16,9 @@ const useComponentStyles = makeStyles({
   },
   field: {
     margin: '8px 0px',
+  },
+  regMessage: {
+    marginTop: '10px',
   }
 });
 
@@ -60,10 +64,10 @@ const LoginForm: FC = observer(() => {
   }, [errors, setErrors, fields, store]);
 
   return (
-    <Grid container justify="center" alignContent="center">
-      <Grid item xs={12} className={classes.gridItem} >
+    <div>
+      <div className={classes.gridItem} >
         <h1>Вход</h1>
-      </Grid>
+      </div>
       <form className={componentClasses.form}>
         <FormControl fullWidth required error={!!errors.login} className={componentClasses.field}>
           <InputLabel htmlFor="email">Логин</InputLabel>
@@ -82,8 +86,10 @@ const LoginForm: FC = observer(() => {
           <Button onClick={onSubmit} variant="contained" color="primary" size="large">Войти</Button>
         </FormControl>
       </form>
-
-    </Grid>
+      <div className={componentClasses.regMessage}>
+        <p>Если у вас еще нет учетной записи, то вы можете <Link to="/registration" className={classes.link}>зарегистрироваться</Link></p>
+      </div>
+    </div>
   )
 })
 

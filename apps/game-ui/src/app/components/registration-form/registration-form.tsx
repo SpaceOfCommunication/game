@@ -55,10 +55,10 @@ const RegistrationForm: FC = () => {
   }, [errors, setErrors, fields, history]);
 
   return (
-    <Grid container justify="center" alignContent="center">
-      <Grid item xs={12} className={classes.gridItem} >
+    <div>
+      <div className={classes.gridItem} >
         <h1>Регистрация</h1>
-      </Grid>
+      </div>
       <form className={componentClasses.form}>
         <FormControl fullWidth required error={!!errors.login} className={componentClasses.field}>
           <InputLabel htmlFor="email">Логин</InputLabel>
@@ -84,7 +84,7 @@ const RegistrationForm: FC = () => {
           <Button onClick={onFormSubmit} variant="contained" color="primary" size="large">Зарегистрироваться</Button>
         </FormControl>
       </form>
-    </Grid>
+    </div>
   )
 }
 
