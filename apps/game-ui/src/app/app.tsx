@@ -1,13 +1,13 @@
-import { AppBar, Button, CssBaseline, makeStyles, Snackbar, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Button, CssBaseline, makeStyles, Snackbar, Toolbar, createMuiTheme, ThemeProvider } from '@material-ui/core';
 import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import React, { useCallback } from 'react';
 
-import './app.scss';
+import logo from '../assets/logo.svg'
 
 import { StoreProvider } from '../core/store';
 import GamesList from './components/games-list/games-list';
 import GameConstructor from './components/game-constructor/game-constructor';
-import { useCommonStyles } from '../core/styles';
+import { PRIMARY_COLOR, SECONDARY_COLOR, useCommonStyles } from '../core/styles';
 import GameOneCLick from './components/game-one-click/game-one-click';
 import LoginForm from './components/login-form/login-form';
 import RegistrationForm from './components/registration-form/registration-form';
@@ -17,13 +17,33 @@ import { MessageService } from '../core/message-service';
 import DialogConfirm from './components/dialog-confirm/dialog-confirm';
 import { DialogService } from '../core/dialog-service';
 
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: PRIMARY_COLOR,
+    },
+    secondary: {
+      main: SECONDARY_COLOR,
+    },
+  },
+});
+
 const useComponentStyles = makeStyles({
   navLink: {
     margin: '0px 15px',
+    fontSize: '125%',
+    fontWeight: 'bold',
+
   },
   title: {
     marginRight: '20px',
-  }
+  },
+  logo: {
+    height: '64px',
+  },
+  spacer: {
+    flexGrow: 1,
+  },
 });
 
 export const App = observer(() => {
@@ -36,21 +56,22 @@ export const App = observer(() => {
   }, [messageService]);
 
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       <StoreProvider>
         <Router>
-          <AppBar position="relative">
+          <AppBar position="relative" color="secondary">
             <Toolbar>
-              <Typography className={componentClasses.title} variant="h6" color="inherit" noWrap>
-                Пространство Общения
-            </Typography>
               <Link to="/" className={classes.link}>
-                <Button className={componentClasses.navLink} color="inherit" disableElevation>Игры</Button>
+                <img src={logo} className={componentClasses.logo} alt="Логотип пространства общения"/>
+              </Link>
+              <Link to="/" className={classes.link}>
+                <Button className={componentClasses.navLink} color="inherit" disableElevation>Мои Игры</Button>
               </Link>
               <Link to="/create-game" className={classes.link}>
                 <Button className={componentClasses.navLink} color="inherit" disableElevation>Создать новую игру</Button>
               </Link>
+              <div className={componentClasses.spacer}></div>
               <Link to="/login" className={classes.link}>
                 <Button className={componentClasses.navLink} color="inherit" disableElevation>Войти</Button>
               </Link>
@@ -82,7 +103,7 @@ export const App = observer(() => {
           </main>
         </Router>
       </StoreProvider>
-    </>
+    </ThemeProvider>
   );
 });
 

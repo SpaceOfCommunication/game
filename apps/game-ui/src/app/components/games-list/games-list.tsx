@@ -27,7 +27,7 @@ export const GamesList: FC<GamesListProps> = observer((props) => {
     const dialog = DialogService.getInstance();
     dialog.showDialog({
       title: `Удаление игры ${game.title}`,
-      message: `Вы действительно хотите удалить игру ${game.title}`,
+      message: `Вы действительно хотите удалить игру "${game.title}"?`,
       onClose: () => dialog.closeDialog(),
       onConfim: () => store.db.pouchDB.remove(game.id, game.rev).then(() => dialog.closeDialog())
     });
@@ -53,7 +53,7 @@ export const GamesList: FC<GamesListProps> = observer((props) => {
               <Link to={`/create-game/${game.id}`} className={classes.link}>
                 <Button color="primary" startIcon={<CreateIcon />}>Редактировать</Button>
               </Link>
-              <Button onClick={showDeleteDialog.bind(undefined, game)} color="secondary" startIcon={<DeleteForeverIcon />}>Удалить</Button>
+              <Button onClick={showDeleteDialog.bind(undefined, game)} startIcon={<DeleteForeverIcon />}>Удалить</Button>
             </div>
           </div>
         </div>

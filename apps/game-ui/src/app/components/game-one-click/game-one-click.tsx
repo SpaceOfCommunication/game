@@ -21,7 +21,7 @@ const useComponentStyles = makeStyles({
     alignItems: 'center',
   },
   game: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#000000',
   },
   infoWrapper: {
     display: 'flex',
