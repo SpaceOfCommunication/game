@@ -11,7 +11,6 @@ export const SimpleTarget : FC<SimpleTargetProps> = (props) => {
             targetEl.style.transform = `translate(${props.position.x}px, ${props.position.y}px)`
         }
     });
-    
     return (
         <div className="simple-target" ref={targetRef} onClick={props.onTargetHit}></div>
     );

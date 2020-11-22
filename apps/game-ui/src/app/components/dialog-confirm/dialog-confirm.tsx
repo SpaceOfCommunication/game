@@ -4,8 +4,6 @@ import React, { FC } from 'react';
 
 const DialogConfirm: FC<DialogData> = (props) => {
   const { title, message, onConfim, onClose } = props;
-
-  console.log(title, message, onConfim, onClose)
   
   return (
     <Dialog open={!!title}>
