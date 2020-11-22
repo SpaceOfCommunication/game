@@ -5,7 +5,7 @@ import { useCommonStyles } from '../../../core/styles';
 import { useStore } from '../../../core/store';
 import { observer } from 'mobx-react-lite';
 import { MessageService } from '../../../core/message-service';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 const useComponentStyles = makeStyles({
   form: {
@@ -26,6 +26,7 @@ const LoginForm: FC = observer(() => {
   const classes = useCommonStyles();
   const componentClasses = useComponentStyles();
   const store = useStore();
+  const history = useHistory();
 
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
@@ -48,9 +49,10 @@ const LoginForm: FC = observer(() => {
     try {
       const { response, pouchDB } = await Auth.login(fields.login, fields.password);
       if (response.ok && response.name) {
-        localStorage.setItem('userName', response.name);
-        store.db.syncWithRemoteDB(pouchDB);
+        // localStorage.setItem('userName', response.name);
+        store.authorize(fields.login, pouchDB);
         messageService.showMessage({ message: 'Авторизация прошла успешно', status: 'success' });
+        history.push('/');
       } else {
         throw new Error();
       }
@@ -61,7 +63,7 @@ const LoginForm: FC = observer(() => {
         messageService.showMessage({ message: 'Неизвестная ошибка. Попробуйте снова или обратитесь в поддержку.', status: 'error' });
       }
     }
-  }, [errors, setErrors, fields, store]);
+  }, [errors, setErrors, fields, store, history]);
 
   return (
     <div>

@@ -3,7 +3,13 @@ import * as winston from 'winston';
 import * as expressWinston from 'express-winston';
 import { DB } from './app/db';
 
-const db = new DB()
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const config = require('./assets/db.json');
+if (!config) {
+  throw new Error('App config not found')
+}
+
+const db = new DB(config.login, config.password);
 const app = express();
 
 app.use(express.json());

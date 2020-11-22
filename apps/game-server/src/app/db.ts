@@ -6,11 +6,11 @@ PouchDB.plugin(PouchAuthentication);
 export class DB {
   private _db: PouchDB.Database
 
-  constructor() {
+  constructor(login: string, password: string) {
     this._db = new PouchDB(`http://localhost:5984/`, {
       auth: {
-        username: 'admin',
-        password: 'admin'
+        username: login,
+        password: password
       },
       // eslint-disable-next-line @typescript-eslint/camelcase
       skip_setup: true 

@@ -1,4 +1,4 @@
-import { IObservableArray } from 'mobx';
+import { IObservableArray, IObservableValue } from 'mobx';
 import { DB } from './db';
 
 export interface GameScreenModel {
@@ -15,12 +15,13 @@ export interface GameModel {
 }
 
 export interface Store {
-  userName?: string;
+  userName: IObservableValue<string>;
   db: DB;
   games: IObservableArray<GameModel>;
   isAuthenticated: boolean;
   isInitialized: boolean;
   authorize(userName: string, remotePouchDB: PouchDB.Database): Promise<void>;
+  logout(): Promise<void>;
   fetchGameModels(): Promise<GameModel[]>;
   initialize(): Promise<void>;
 }

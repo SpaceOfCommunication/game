@@ -7,6 +7,7 @@ import { Auth } from './auth';
 
 // eslint-disable-next-line @typescript-eslint/camelcase
 const POUCH_REQ_CONF = { include_docs: true, attachments: true, binary: true };
+let pouchChangesListener: PouchDB.Core.Changes<DocModel>;
 
 function doc2model(doc: PouchDB.Core.ExistingDocument<DocModel>): GameModel {
   const gameModel: GameModel = {
@@ -26,26 +27,39 @@ function doc2model(doc: PouchDB.Core.ExistingDocument<DocModel>): GameModel {
 }
 
 function createStore() {
-  const db = getLocalDB(); 
-
   const store : Store = {
-    userName: undefined,
+    userName: observable.box(),
     isInitialized: false,
-    db,
+    db: getLocalDB(),
     games: observable.array([], { deep: false, proxy: false }),
 
     get isAuthenticated() {
-      return !!this.userName;
+      return !!this.userName.get();
     },
 
-    async authorize(this: Store, userName: string, remotePouchDB: PouchDB.Database) {
-      this.userName = userName;
-      return this.db.syncWithRemoteDB(remotePouchDB);
+    async authorize(userName: string, remotePouchDB: PouchDB.Database) {
+      store.userName.set(userName);
+      return store.db.syncWithRemoteDB(remotePouchDB);
+    },
+
+    async logout() {
+      const userName = store.userName?.get();
+      if (!userName) {
+        return;
+      }
+      store.db.cancelSync();
+      pouchChangesListener.cancel();
+      await Auth.logout(userName);
+      store.db.destroy();
+      store.db = getLocalDB();
+      store.games.clear();
+      store.userName.set('');
+      // await store.initialize();
     },
 
     async fetchGameModels() {
       // eslint-disable-next-line @typescript-eslint/camelcase
-      const docs = await db.pouchDB.allDocs<DocModel>(POUCH_REQ_CONF);
+      const docs = await store.db.pouchDB.allDocs<DocModel>(POUCH_REQ_CONF);
       const models = docs.rows.map(({ doc}) => doc && doc2model(doc)).filter((model) => !!model) as GameModel[];
       return models;
     },
@@ -53,7 +67,7 @@ function createStore() {
     async initialize() {
       const gameModels = await store.fetchGameModels();
       store.games.replace(gameModels);
-      store.db.pouchDB.changes<DocModel>({ since: 'now', live: true, ...POUCH_REQ_CONF}).on('change', (change) => {
+      pouchChangesListener = store.db.pouchDB.changes<DocModel>({ since: 'now', live: true, ...POUCH_REQ_CONF}).on('change', (change) => {
         if (change.deleted) {
           const game = store.games.find((game) => game.id === change.id);
           if (game) {
@@ -69,13 +83,11 @@ function createStore() {
           }
         }
       });
-      const username = localStorage.getItem('userName');
-      if (username) {
-        const isAuthenticated = await Auth.isAuthenticated(username);
-        if (isAuthenticated) {
-          console.log(username, 'isAuthenticated')
-          store.db.syncWithRemoteDB(getRemoteDB(username));
-        }
+      // const username = localStorage.getItem('userName');
+      const userName = await Auth.getUserName();
+      if (userName) {
+        store.userName.set(userName);
+        store.db.syncWithRemoteDB(getRemoteDB(userName));
       }
       store.isInitialized = true;
     }

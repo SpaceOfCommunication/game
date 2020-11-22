@@ -26,5 +26,10 @@ export const useCommonStyles = makeStyles({
   gridItem: {
     textAlign: 'center',
     padding: '15px'
+  },
+  navLink: {
+    margin: '0px 15px',
+    fontSize: '125%',
+    fontWeight: 'bold',
   }
 });

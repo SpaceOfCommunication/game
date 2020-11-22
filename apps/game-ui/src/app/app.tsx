@@ -16,6 +16,7 @@ import { observer } from 'mobx-react-lite';
 import { MessageService } from '../core/message-service';
 import DialogConfirm from './components/dialog-confirm/dialog-confirm';
 import { DialogService } from '../core/dialog-service';
+import ProfileItem from './components/profile-item/profile-item';
 
 const theme = createMuiTheme({
   palette: {
@@ -29,12 +30,6 @@ const theme = createMuiTheme({
 });
 
 const useComponentStyles = makeStyles({
-  navLink: {
-    margin: '0px 15px',
-    fontSize: '125%',
-    fontWeight: 'bold',
-
-  },
   title: {
     marginRight: '20px',
   },
@@ -66,15 +61,13 @@ export const App = observer(() => {
                 <img src={logo} className={componentClasses.logo} alt="Логотип пространства общения"/>
               </Link>
               <Link to="/" className={classes.link}>
-                <Button className={componentClasses.navLink} color="inherit" disableElevation>Мои Игры</Button>
+                <Button className={classes.navLink} color="inherit" disableElevation>Мои Игры</Button>
               </Link>
               <Link to="/create-game" className={classes.link}>
-                <Button className={componentClasses.navLink} color="inherit" disableElevation>Создать новую игру</Button>
+                <Button className={classes.navLink} color="inherit" disableElevation>Создать новую игру</Button>
               </Link>
               <div className={componentClasses.spacer}></div>
-              <Link to="/login" className={classes.link}>
-                <Button className={componentClasses.navLink} color="inherit" disableElevation>Войти</Button>
-              </Link>
+              <ProfileItem></ProfileItem>
             </Toolbar>
           </AppBar>
           <main className={classes.main}>

@@ -16,7 +16,7 @@ export function getRemoteDB(userName: string) {
   return new PouchDB(`${environment.pouchURL}/${DBName}`, pouchConfig);
 }
 
-export function getRemoteDBTEST() {
+export function getRemoteAuthDB() {
   return new PouchDB(`${environment.pouchURL}`, pouchConfig);
 }
 
@@ -30,14 +30,26 @@ function hexEncode(text: string) {
 
 export class DB {
 
+  private _sync?: PouchDB.Replication.Sync<any>;
+
   constructor(public pouchDB: PouchDB.Database) { }
 
   public syncWithRemoteDB(remotePouchDB: PouchDB.Database) {
-    this.pouchDB.replicate.from(remotePouchDB).on('complete', () => {
-      this.pouchDB.sync(remotePouchDB, { live: true, retry: false });
+    this.pouchDB.replicate.to(remotePouchDB).on('complete', () => {
+      this._sync = this.pouchDB.sync(remotePouchDB, { live: true, retry: false });
     }).on('error', (err) => {
       console.error('ERROR', err);
     });
+  }
+  
+  public cancelSync() {
+    if (this._sync) {
+      this._sync.cancel();
+    }
+  }
+
+  public destroy() {
+    this.pouchDB.destroy();
   }
 
 }

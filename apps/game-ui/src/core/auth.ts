@@ -1,5 +1,5 @@
 import { environment } from '../environments/environment';
-import { getRemoteDB, getRemoteDBTEST } from './db';
+import { getRemoteDB, getRemoteAuthDB } from './db';
 
 
 export class Auth {
@@ -20,17 +20,13 @@ export class Auth {
     return {response, pouchDB};
   }
 
-  public static async logout(db: PouchDB.Database) {
-    return db.logOut();
+  public static async logout(username: string) {
+    const pouchDB = getRemoteDB(username);
+    return pouchDB.logOut();
   }
 
-  public static async isAuthenticated(username: string) {
-    const session = await getRemoteDBTEST().getSession();
-    return !!session.userCtx.name;
-  }
-
-  public static async getUserName(db: PouchDB.Database) {
-    const session = await db.getSession();
+  public static async getUserName() {
+    const session = await getRemoteAuthDB().getSession();
     return session.userCtx.name;
   }
 

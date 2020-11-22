@@ -50,7 +50,7 @@ const RegistrationForm: FC = () => {
       response.json().then((body) => messageService.showMessage({ message: body.message, status: 'error' }))
       return;
     }
-    messageService.showMessage({ message: 'Регистрация успешно завершена', status: 'success' });
+    messageService.showMessage({ message: 'Регистрация успешно завершена. Теперь вы можете войти', status: 'success' });
     history.push('/login');
   }, [errors, setErrors, fields, history]);
 
