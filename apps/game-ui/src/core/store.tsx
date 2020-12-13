@@ -1,9 +1,13 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import React, { createContext, useContext } from 'react';
 import { getLocalDB, getRemoteDB } from './db';
 import { useLocalObservable } from 'mobx-react-lite'
 import { observable } from 'mobx';
 import { DocModel, GameModel, Store } from './interfaces';
 import { Auth } from './auth';
+import demoGameImage from '../assets/demo-game.jpeg';
+import demoGameAudio from '../assets/demo-game.mp3';
+import { DEFAULT_MELODY_DURATION } from './constants';
 
 // eslint-disable-next-line @typescript-eslint/camelcase
 const POUCH_REQ_CONF = { include_docs: true, attachments: true, binary: true };
@@ -29,7 +33,7 @@ function doc2model(doc: PouchDB.Core.ExistingDocument<DocModel>): GameModel {
 function createStore() {
   const store : Store = {
     userName: observable.box(),
-    isInitialized: false,
+    isInitialized: observable.box(-1),
     db: getLocalDB(),
     games: observable.array([], { deep: false, proxy: false }),
 
@@ -54,7 +58,6 @@ function createStore() {
       store.db = getLocalDB();
       store.games.clear();
       store.userName.set('');
-      // await store.initialize();
     },
 
     async fetchGameModels() {
@@ -65,6 +68,10 @@ function createStore() {
     },
 
     async initialize() {
+      if (store.isInitialized.get() > -1) {
+        return;
+      }
+      store.isInitialized.set(0);
       const gameModels = await store.fetchGameModels();
       store.games.replace(gameModels);
       pouchChangesListener = store.db.pouchDB.changes<DocModel>({ since: 'now', live: true, ...POUCH_REQ_CONF}).on('change', (change) => {
@@ -83,19 +90,34 @@ function createStore() {
           }
         }
       });
+      if (gameModels.length === 0) {
+        const [demoImage, demoAudio] = await Promise.all([
+          fetch(demoGameImage),
+          fetch(demoGameAudio),
+        ]).then((([img, sfx]) => Promise.all([img.blob(), sfx.blob()])));
+  
+        const _attachments: DocModel["_attachments"] = {
+          'img-0': {
+            content_type: demoImage.type,
+            data: demoImage
+          },
+          'sfx-0': {
+            content_type: demoAudio.type,
+            data: demoAudio
+          }
+        };
+        await store.db.pouchDB.post<DocModel>({ title: 'Демонтстрационная игра', audioDuration: DEFAULT_MELODY_DURATION, _attachments });
+      }
       // const username = localStorage.getItem('userName');
       const userName = await Auth.getUserName();
       if (userName) {
         store.userName.set(userName);
         store.db.syncWithRemoteDB(getRemoteDB(userName));
       }
-      store.isInitialized = true;
+      store.isInitialized.set(1);
     }
   };
-
   store.initialize();
-  console.log('creation');
-
   return store;
 }
 

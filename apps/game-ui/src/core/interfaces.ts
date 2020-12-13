@@ -19,7 +19,7 @@ export interface Store {
   db: DB;
   games: IObservableArray<GameModel>;
   isAuthenticated: boolean;
-  isInitialized: boolean;
+  isInitialized: IObservableValue<-1 | 0 | 1>;
   authorize(userName: string, remotePouchDB: PouchDB.Database): Promise<void>;
   logout(): Promise<void>;
   fetchGameModels(): Promise<GameModel[]>;

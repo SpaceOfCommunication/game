@@ -1,4 +1,4 @@
-import { AppBar, Button, CssBaseline, makeStyles, Snackbar, Toolbar, createMuiTheme, ThemeProvider } from '@material-ui/core';
+import { AppBar, Button, CssBaseline, makeStyles, Snackbar, Toolbar, createMuiTheme, ThemeProvider, LinearProgress } from '@material-ui/core';
 import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import React, { useCallback } from 'react';
 
@@ -17,6 +17,7 @@ import { MessageService } from '../core/message-service';
 import DialogConfirm from './components/dialog-confirm/dialog-confirm';
 import { DialogService } from '../core/dialog-service';
 import ProfileItem from './components/profile-item/profile-item';
+import ProgressBar from '../core/progress-bar';
 
 const theme = createMuiTheme({
   palette: {
@@ -34,7 +35,7 @@ const useComponentStyles = makeStyles({
     marginRight: '20px',
   },
   logo: {
-    height: '64px',
+    height: '96px',
   },
   spacer: {
     flexGrow: 1,
@@ -70,6 +71,7 @@ export const App = observer(() => {
               <ProfileItem></ProfileItem>
             </Toolbar>
           </AppBar>
+          <ProgressBar></ProgressBar>
           <main className={classes.main}>
             <Switch>
               <Route path="/login">
