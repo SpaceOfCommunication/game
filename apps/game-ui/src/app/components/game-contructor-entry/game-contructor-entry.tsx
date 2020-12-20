@@ -2,6 +2,7 @@ import { Button, FormControl, FormHelperText, Grid, makeStyles } from '@material
 import React, { FC, useState, useCallback } from 'react';
 import { useCommonStyles } from '../../../core/styles';
 import nopicture from '../../../assets/no-picture.png';
+import noaudio from '../../../assets/no-audio.jpg';
 import FilePicker from '../ui/file-picker';
 import AudioPlayer from '../audio-player/audio-player';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
@@ -90,15 +91,16 @@ const GameConstructorEntry: FC<GameConstructorEntryProps> = (props) => {
         </FormControl>
       </Grid>
       <Grid item xs={5} className={inputBlockClasses}>
+        {!audio && <img src={noaudio} className={componentClasses.previewImage} alt="Пустое изображение"></img>}
         {audio && <AudioPlayer audioSource={audio}></AudioPlayer>}
         <FormControl className={componentClasses.fileSelectionBlock}>
-          <FilePicker onFileSelection={handleAudioSelection} accept="audio/*" ariaDescribedby="Поле выбора аудио файла"></FilePicker>
+          <FilePicker onFileSelection={handleAudioSelection} accept="audio/mpeg, audio/ogg" ariaDescribedby="Поле выбора аудио файла"></FilePicker>
           <FormHelperText id="my-helper-text">
             Выберите мелодию <span role="img" aria-label="иконка мелодии">🎶</span> на своем компьютере
           </FormHelperText>
         </FormControl>
       </Grid>
-      <Grid item xs={2} className={inputBlockClasses}>
+      <Grid item xs={2} className={`${classes.gridItem} ${componentClasses.inputBlock}`}>
         <Button onClick={() => onDelete && onDelete()} variant="contained" color="secondary" startIcon={<DeleteForeverIcon />}>Удалить</Button>
       </Grid>
     </Grid>

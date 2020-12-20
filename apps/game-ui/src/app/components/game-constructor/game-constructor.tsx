@@ -37,16 +37,19 @@ export const GameConstructor: FC = observer(() => {
   const [showValidationState, setShowValidationState] = useState(false);
   const [melodyDuration, setMelodyDuration] = useState(DEFAULT_MELODY_DURATION);
   const [gameTitle, setGameTitle] = useState<string>(DEFAULT_TITLE);
+  const [formDisabled, setFormDisabled] = useState<boolean>(false);
   const game = id ? store.games.find((game) => game.id === id) : undefined;
 
   useEffect(() => {
     setScreensState(game?.screens ? [...game?.screens] : []);
     setGameTitle(game?.title || DEFAULT_TITLE);
     setMelodyDuration(game?.audioDuration || DEFAULT_MELODY_DURATION);
+    setFormDisabled(!game?.screens.length);
   }, [setScreensState, game]);
 
   const handleEntryAdd = useCallback(() => {
     setScreensState([...screensState, {}]);
+    setFormDisabled(false);
   }, [screensState, setScreensState]);
 
   const handleEntryChange = useCallback((screen: GameScreenModelDraft, picture?: Blob, audio?: Blob) => {
@@ -56,12 +59,20 @@ export const GameConstructor: FC = observer(() => {
   }, [screensState]);
 
   const handleEntryDelete = useCallback((screen: GameScreenModelDraft) => {
-    setScreensState([...screensState.filter((ss) => ss !== screen)]);
+    const newScreenState = [...screensState.filter((ss) => ss !== screen)];
+    setScreensState(newScreenState);
+    if (newScreenState.length === 0) {
+      setFormDisabled(true);
+    }
   }, [screensState]);
 
   const handleSave = useCallback(async () => {
+    if (screensState.length === 0) {
+      MessageService.getInstance().showMessage({ message: 'Необходимо иметь хотя бы один экран, чтобы создать игру', status: 'error' });
+    }
     const hasEmptyFields = screensState.some((screen) => !isValidScreen(screen));
     if (hasEmptyFields) {
+      MessageService.getInstance().showMessage({ message: 'Все поля должны быть заполнены', status: 'error' });
       setShowValidationState(true);
       return;
     }
@@ -105,8 +116,8 @@ export const GameConstructor: FC = observer(() => {
         <TextField className={componentClasses.textInput} type="number" value={melodyDuration} InputLabelProps={{ shrink: true }}
           onChange={e => setMelodyDuration(+e.target.value)} label="Длительность мелодии (секунд)" variant="outlined"/>
       </div>
-      <Message>Для создания игрового экрана загрузите картинку <span role="img" aria-label="иконка картинки">🖼 </span>
-        и мелодию <span role="img" aria-label="иконка мелодии">🎶</span></Message>
+      <Message>Для создания игрового экрана загрузите картинку jpg, png <span role="img" aria-label="иконка картинки">🖼 </span>
+        и мелодию mp3, ogg <span role="img" aria-label="иконка мелодии">🎶</span></Message>
       <div>
         {screensState.map((screen, i) => (
           <GameConstructorEntry
@@ -121,7 +132,7 @@ export const GameConstructor: FC = observer(() => {
         <Button onClick={handleEntryAdd} variant="contained" color="primary" size="large" startIcon={<AddIcon />}>
           Добавить игровой экран
         </Button>
-        <Button onClick={handleSave} variant="contained" color="secondary" size="large" startIcon={<SaveIcon />}>
+        <Button onClick={handleSave} disabled={formDisabled} variant="contained" color="secondary" size="large" startIcon={<SaveIcon />}>
           Сохранить игру
         </Button>
       </div>

@@ -6,8 +6,10 @@ import { observable } from 'mobx';
 import { DocModel, GameModel, Store } from './interfaces';
 import { Auth } from './auth';
 import demoGameImage from '../assets/demo-game.jpeg';
-import demoGameAudio from '../assets/demo-game.mp3';
 import { DEFAULT_MELODY_DURATION } from './constants';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const demoGameAudio = require('../assets/demo-game.mp3');
 
 // eslint-disable-next-line @typescript-eslint/camelcase
 const POUCH_REQ_CONF = { include_docs: true, attachments: true, binary: true };
@@ -106,13 +108,16 @@ function createStore() {
             data: demoAudio
           }
         };
-        await store.db.pouchDB.post<DocModel>({ title: 'Демонтстрационная игра', audioDuration: DEFAULT_MELODY_DURATION, _attachments });
+        await store.db.pouchDB.post<DocModel>({ title: 'Пример игры', audioDuration: DEFAULT_MELODY_DURATION, _attachments });
       }
-      // const username = localStorage.getItem('userName');
-      const userName = await Auth.getUserName();
-      if (userName) {
-        store.userName.set(userName);
-        store.db.syncWithRemoteDB(getRemoteDB(userName));
+      try {
+        const userName = await Auth.getUserName();
+        if (userName) {
+          store.userName.set(userName);
+          store.db.syncWithRemoteDB(getRemoteDB(userName));
+        }
+      } catch(err) {
+        console.error(err);
       }
       store.isInitialized.set(1);
     }

@@ -28,6 +28,7 @@ export const useGameListStyles = makeStyles({
     borderRadius: '5px',
     boxShadow: '0px 7px 13px -10px',
     backgroundColor: '#ffffff',
+    height: '350px',
   },
   ...gameBlockMedias,
   contentWrapper: {
