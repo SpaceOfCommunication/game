@@ -5,7 +5,9 @@
 Кратко: 
 
 `sudo apt-get install couchdb`
+
 `npm install -g add-cors-to-couchdb`
+
 `add-cors-to-couchdb`
 
 
