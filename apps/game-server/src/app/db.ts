@@ -6,8 +6,8 @@ PouchDB.plugin(PouchAuthentication);
 export class DB {
   private _db: PouchDB.Database
 
-  constructor(login: string, password: string) {
-    this._db = new PouchDB(`http://localhost:5984/`, {
+  constructor(url: string, login: string, password: string) {
+    this._db = new PouchDB(url, {
       auth: {
         username: login,
         password: password
