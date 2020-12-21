@@ -18,6 +18,7 @@ import DialogConfirm from './components/dialog-confirm/dialog-confirm';
 import { DialogService } from '../core/dialog-service';
 import ProfileItem from './components/profile-item/profile-item';
 import ProgressBar from '../core/progress-bar';
+import About from './components/about/about';
 
 const theme = createMuiTheme({
   palette: {
@@ -67,6 +68,9 @@ export const App = observer(() => {
               <Link to="/create-game" className={classes.link}>
                 <Button className={classes.navLink} color="inherit" disableElevation>Создать новую игру</Button>
               </Link>
+              <Link to="/about" className={classes.link}>
+                <Button className={classes.navLink} color="inherit" disableElevation>О Игре</Button>
+              </Link>
               <div className={componentClasses.spacer}></div>
               <ProfileItem></ProfileItem>
             </Toolbar>
@@ -74,6 +78,9 @@ export const App = observer(() => {
           <ProgressBar></ProgressBar>
           <main className={classes.main}>
             <Switch>
+              <Route path="/about">
+                <About></About>
+              </Route>
               <Route path="/login">
                 <LoginForm></LoginForm>
               </Route>
