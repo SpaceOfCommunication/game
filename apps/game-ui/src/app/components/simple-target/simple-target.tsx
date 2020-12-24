@@ -13,16 +13,32 @@ const useStyles = makeStyles({
   }
 });
 
+// function specialButtonPressHandler(event: KeyboardEvent) {
+//   if (event.key === 'Enter') {
+
+//   }
+// }
+
 export const SimpleTarget: FC<SimpleTargetProps> = (props) => {
+  const { position, onTargetHit } = props;
   const classes = useStyles();
   const targetRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const targetEl = targetRef.current;
-    if (targetEl && props.position?.y && props.position?.x) {
-      targetEl.style.transform = `translate(${props.position.x}px, ${props.position.y}px)`
+    if (targetEl && position?.y && position?.x) {
+      targetEl.style.transform = `translate(${position.x}px, ${position.y}px)`
     }
-  });
+    const specialButtonPressHandler = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && onTargetHit) {
+        onTargetHit();
+      }
+    }
+    window.addEventListener('keydown', specialButtonPressHandler);
+    return () => {
+      window.removeEventListener('keydown', specialButtonPressHandler);
+    }
+  }, [position?.y, position?.x, onTargetHit]);
   return (
-    <div className={classes.target} ref={targetRef} onClick={props.onTargetHit}></div>
+    <div className={classes.target} ref={targetRef} onClick={onTargetHit}></div>
   );
 }
