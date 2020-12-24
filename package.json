@@ -6,6 +6,7 @@
     "nx": "nx",
     "start": "nx serve",
     "build": "nx build",
+    "build:prod": "nx build --prod",
     "test": "nx test",
     "lint": "nx workspace-lint && nx lint",
     "e2e": "nx e2e",
@@ -25,7 +26,7 @@
     "dep-graph": "nx dep-graph",
     "help": "nx help",
     "start:be": "nx serve game-server",
-    "build:be": "nx build game-server",
+    "build:be": "nx build game-server --prod",
     "deploy": "firebase deploy",
     "firebase:deploy": "nx build && firebase deploy"
   },

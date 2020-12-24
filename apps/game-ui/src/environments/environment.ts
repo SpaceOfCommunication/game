@@ -10,5 +10,5 @@ export interface Environment {
 export const environment: Environment = {
   production: false,
   apiPath: '/api',
-  pouchURL: 'http://localhost:5984'
+  pouchURL: 'http://localhost:8088/couchdb'
 };

@@ -9,7 +9,7 @@ if (!config) {
   throw new Error('App config not found')
 }
 
-const db = new DB(config.url, config.login, config.password);
+const db = new DB(config.db, config.login, config.password);
 const app = express();
 
 app.use(express.json());
