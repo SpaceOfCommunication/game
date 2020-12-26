@@ -3,6 +3,7 @@ import { makeStyles } from '@material-ui/core';
 export const useGameConstructorStyles = makeStyles({
   wrapper: {
     padding: '20px',
+    maxWidth: '1300px',
   },
   header: {
     textAlign: 'center',
@@ -18,5 +19,10 @@ export const useGameConstructorStyles = makeStyles({
   buttons: {
     display: 'flex',
     justifyContent: 'space-around'
-  }
+  },
+  screnWrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
 });

@@ -90,15 +90,15 @@ export const GameConstructor: FC = observer(() => {
         data: audio
       };
     });
-    const docModel : DocModel = { title: gameTitle, audioDuration: melodyDuration, _attachments };
+    const docModel: DocModel = { title: gameTitle, audioDuration: melodyDuration, _attachments };
     try {
       if (game) {
-        await store.db.pouchDB.put<DocModel>({ _id: game.id, _rev: game.rev, ...docModel}, { force: true });
+        await store.db.pouchDB.put<DocModel>({ _id: game.id, _rev: game.rev, ...docModel }, { force: true });
       } else {
         await store.db.pouchDB.post<DocModel>(docModel);
       }
       MessageService.getInstance().showMessage({ message: `Игра успешно ${game ? 'сохранена' : 'создана'}`, status: 'success' });
-    } catch(err) {
+    } catch (err) {
       MessageService.getInstance().showMessage({ message: 'При создании игры произошла ошибка. Попробуйте еще раз', status: 'error' });
     }
     history.push('/')
@@ -107,18 +107,20 @@ export const GameConstructor: FC = observer(() => {
   return (
     <div className={componentClasses.wrapper}>
       <div className={componentClasses.header}>
-      <h1>{game ? 'Редактировать игру' : 'Создание новой игры'}</h1>
+        <h1>{game ? 'Редактировать игру' : 'Создание новой игры'}</h1>
       </div>
-      <Message>Придумайте название игры и введите базовые натройки</Message>
+      <Message>Придумайте название игры и введите базовые настройки</Message>
       <div className={componentClasses.textInputBlock}>
         <TextField className={componentClasses.textInput} value={gameTitle}
-          onChange={e => setGameTitle(e.target.value)} label="Название игры" variant="outlined"/>
+          onChange={e => setGameTitle(e.target.value)} label="Название игры" variant="outlined" />
         <TextField className={componentClasses.textInput} type="number" value={melodyDuration} InputLabelProps={{ shrink: true }}
-          onChange={e => setMelodyDuration(+e.target.value)} label="Длительность мелодии (секунд)" variant="outlined"/>
+          onChange={e => setMelodyDuration(+e.target.value)} label="Длительность мелодии (секунды)" variant="outlined" />
       </div>
-      <Message>Для создания игрового экрана загрузите картинку jpg, png <span role="img" aria-label="иконка картинки">🖼 </span>
-        и мелодию mp3, ogg <span role="img" aria-label="иконка мелодии">🎶</span></Message>
-      <div>
+      <Message>Для создания игры загрузите картинку в формате jpg или png <span role="img" aria-label="иконка картинки">🖼 </span>
+        и мелодию в формате mp3 или ogg <span role="img" aria-label="иконка мелодии">🎶</span></Message>
+      <Message>В одну игру можно добавить несколько пар картинка+мелодия. Для этого нажмите на кнопку “Добавить игровой экран” столько раз, сколько вам нужно, и загрузите картинки и мелодии в соответствующие поля.</Message>
+      <Message>Когда все загружено, нажмите "Сохранить игру".</Message>
+      <div className={componentClasses.screnWrapper}>
         {screensState.map((screen, i) => (
           <GameConstructorEntry
             onEntryChange={handleEntryChange.bind(undefined, screen)}

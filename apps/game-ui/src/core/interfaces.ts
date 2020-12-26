@@ -20,10 +20,13 @@ export interface Store {
   games: IObservableArray<GameModel>;
   isAuthenticated: boolean;
   isInitialized: IObservableValue<-1 | 0 | 1>;
-  authorize(userName: string, remotePouchDB: PouchDB.Database): Promise<void>;
+  loading: IObservableValue<number>;
+  authorize(userName: string, remotePouchDB: PouchDB.Database): Promise<unknown>;
   logout(): Promise<void>;
   fetchGameModels(): Promise<GameModel[]>;
   initialize(): Promise<void>;
+  incrementLoading(): void;
+  decrementLoading(): void;
 }
 
 export interface DocAttachment {

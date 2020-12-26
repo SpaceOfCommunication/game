@@ -1,10 +1,10 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import PouchDB from 'pouchdb-browser';
 import PouchAuthentication from 'pouchdb-authentication';
 import { environment } from '../environments/environment';
 
 PouchDB.plugin(PouchAuthentication);
 
-// eslint-disable-next-line @typescript-eslint/camelcase
 const pouchConfig = { skip_setup: false, auto_compaction: true };
 
 export function getLocalDB() {
@@ -30,16 +30,34 @@ function hexEncode(text: string) {
 
 export class DB {
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _sync?: PouchDB.Replication.Sync<any>;
 
   constructor(public pouchDB: PouchDB.Database) { }
 
   public syncWithRemoteDB(remotePouchDB: PouchDB.Database) {
-    this.pouchDB.replicate.to(remotePouchDB).on('complete', () => {
-      this._sync = this.pouchDB.sync(remotePouchDB, { live: true, retry: false });
-    }).on('error', (err) => {
-      console.error('ERROR', err);
+    let resolve: (value: unknown) => void;
+    let reject: (reason: unknown) => void;
+    const result = new Promise((res, rej) => {
+      resolve = res;
+      reject = rej;
     });
+    this.pouchDB.replicate.to(remotePouchDB, { batch_size: 2 }).on('complete', () => {
+      this.pouchDB.replicate.from(remotePouchDB, { batch_size: 2 })
+        .on('complete', () => {
+          resolve(true);
+          this._sync = this.pouchDB.sync(remotePouchDB,  { live: true, retry: false });
+        })
+        .on('error', (err) => reject(err))
+        .on('denied', (err) => reject(err));
+    }).on('error', (err) => {
+      reject(err);
+      console.error('Replication error', err);
+    }).on('denied', (err) => {
+      reject(err);
+      console.error('Replication denied', err);
+    });
+    return result;
   }
   
   public cancelSync() {

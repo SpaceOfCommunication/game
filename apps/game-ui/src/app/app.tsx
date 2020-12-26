@@ -69,7 +69,7 @@ export const App = observer(() => {
                 <Button className={classes.navLink} color="inherit" disableElevation>Создать новую игру</Button>
               </Link>
               <Link to="/about" className={classes.link}>
-                <Button className={classes.navLink} color="inherit" disableElevation>О Игре</Button>
+                <Button className={classes.navLink} color="inherit" disableElevation>Об Игре</Button>
               </Link>
               <div className={componentClasses.spacer}></div>
               <ProfileItem></ProfileItem>

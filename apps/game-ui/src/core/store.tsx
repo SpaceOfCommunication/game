@@ -33,9 +33,10 @@ function doc2model(doc: PouchDB.Core.ExistingDocument<DocModel>): GameModel {
 }
 
 function createStore() {
-  const store : Store = {
+  const store: Store = {
     userName: observable.box(),
     isInitialized: observable.box(-1),
+    loading: observable.box(0),
     db: getLocalDB(),
     games: observable.array([], { deep: false, proxy: false }),
 
@@ -45,7 +46,8 @@ function createStore() {
 
     async authorize(userName: string, remotePouchDB: PouchDB.Database) {
       store.userName.set(userName);
-      return store.db.syncWithRemoteDB(remotePouchDB);
+      store.incrementLoading();
+      return store.db.syncWithRemoteDB(remotePouchDB).then(() => store.decrementLoading()).catch(() => store.decrementLoading());;
     },
 
     async logout() {
@@ -65,8 +67,18 @@ function createStore() {
     async fetchGameModels() {
       // eslint-disable-next-line @typescript-eslint/camelcase
       const docs = await store.db.pouchDB.allDocs<DocModel>(POUCH_REQ_CONF);
-      const models = docs.rows.map(({ doc}) => doc && doc2model(doc)).filter((model) => !!model) as GameModel[];
+      const models = docs.rows.map(({ doc }) => doc && doc2model(doc)).filter((model) => !!model) as GameModel[];
       return models;
+    },
+
+    incrementLoading() {
+      console.log('loading start')
+      store.loading.set(store.loading.get() + 1);
+    },
+
+    decrementLoading() {
+      console.log('loading stop')
+      store.loading.set(store.loading.get() - 1 || 0);
     },
 
     async initialize() {
@@ -76,7 +88,7 @@ function createStore() {
       store.isInitialized.set(0);
       const gameModels = await store.fetchGameModels();
       store.games.replace(gameModels);
-      pouchChangesListener = store.db.pouchDB.changes<DocModel>({ since: 'now', live: true, ...POUCH_REQ_CONF}).on('change', (change) => {
+      pouchChangesListener = store.db.pouchDB.changes<DocModel>({ since: 'now', live: true, ...POUCH_REQ_CONF }).on('change', (change) => {
         if (change.deleted) {
           const game = store.games.find((game) => game.id === change.id);
           if (game) {
@@ -97,7 +109,7 @@ function createStore() {
           fetch(demoGameImage),
           fetch(demoGameAudio),
         ]).then((([img, sfx]) => Promise.all([img.blob(), sfx.blob()])));
-  
+
         const _attachments: DocModel["_attachments"] = {
           'img-0': {
             content_type: demoImage.type,
@@ -114,9 +126,10 @@ function createStore() {
         const userName = await Auth.getUserName();
         if (userName) {
           store.userName.set(userName);
-          store.db.syncWithRemoteDB(getRemoteDB(userName));
+          store.incrementLoading();
+          store.db.syncWithRemoteDB(getRemoteDB(userName)).then(() => store.decrementLoading()).catch(() => store.decrementLoading());
         }
-      } catch(err) {
+      } catch (err) {
         console.error(err);
       }
       store.isInitialized.set(1);

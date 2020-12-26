@@ -7,7 +7,7 @@ const ProgressBar: FC = observer(() => {
   const store = useStore();
   return (
     <div>
-      {!store.isInitialized.get() && <LinearProgress></LinearProgress>}
+      {(!store.isInitialized.get() || !!store.loading.get()) && <LinearProgress></LinearProgress>}
     </div>
   )
 });
