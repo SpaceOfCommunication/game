@@ -74,7 +74,7 @@ const LoginForm: FC = observer(() => {
         <FormControl fullWidth required error={!!errors.login} className={componentClasses.field}>
           <InputLabel htmlFor="email">Логин</InputLabel>
           <Input id="email" value={login} onChange={e => setLogin(e.target.value)} aria-describedby="login-helper-text" />
-          {!errors.login && <FormHelperText id="login-helper-text">Пожалуйста укажите свой email</FormHelperText>}
+          {!errors.login && <FormHelperText id="login-helper-text">Введите логин</FormHelperText>}
           {errors.login && <FormHelperText error>{errors.login}</FormHelperText>}
         </FormControl>
         <FormControl fullWidth required error={!!errors.password} className={componentClasses.field}>

@@ -35,7 +35,7 @@ export const GameConstructor: FC = observer(() => {
   const componentClasses = useGameConstructorStyles();
   const [screensState, setScreensState] = useState<GameScreenModelDraft[]>([{}]);
   const [showValidationState, setShowValidationState] = useState(false);
-  const [melodyDuration, setMelodyDuration] = useState(DEFAULT_MELODY_DURATION);
+  const [melodyDuration, setMelodyDuration] = useState(`${DEFAULT_MELODY_DURATION}`);
   const [gameTitle, setGameTitle] = useState<string>(DEFAULT_TITLE);
   const [formDisabled, setFormDisabled] = useState<boolean>(false);
   const game = id ? store.games.find((game) => game.id === id) : undefined;
@@ -43,7 +43,7 @@ export const GameConstructor: FC = observer(() => {
   useEffect(() => {
     setScreensState(game?.screens ? [...game?.screens] : []);
     setGameTitle(game?.title || DEFAULT_TITLE);
-    setMelodyDuration(game?.audioDuration || DEFAULT_MELODY_DURATION);
+    setMelodyDuration(`${game?.audioDuration || DEFAULT_MELODY_DURATION}`);
     setFormDisabled(!game?.screens.length);
   }, [setScreensState, game]);
 
@@ -67,8 +67,13 @@ export const GameConstructor: FC = observer(() => {
   }, [screensState]);
 
   const handleSave = useCallback(async () => {
+    if (Number.isNaN(+melodyDuration) || +melodyDuration <= 0) {
+      MessageService.getInstance().showMessage({ message: 'Длительность мелодии должна быть целым числом', status: 'error' });
+      return;
+    }
     if (screensState.length === 0) {
       MessageService.getInstance().showMessage({ message: 'Необходимо иметь хотя бы один экран, чтобы создать игру', status: 'error' });
+      return;
     }
     const hasEmptyFields = screensState.some((screen) => !isValidScreen(screen));
     if (hasEmptyFields) {
@@ -90,7 +95,7 @@ export const GameConstructor: FC = observer(() => {
         data: audio
       };
     });
-    const docModel: DocModel = { title: gameTitle, audioDuration: melodyDuration, _attachments };
+    const docModel: DocModel = { title: gameTitle, audioDuration: +melodyDuration, _attachments };
     try {
       if (game) {
         await store.db.pouchDB.put<DocModel>({ _id: game.id, _rev: game.rev, ...docModel }, { force: true });
@@ -114,7 +119,7 @@ export const GameConstructor: FC = observer(() => {
         <TextField className={componentClasses.textInput} value={gameTitle}
           onChange={e => setGameTitle(e.target.value)} label="Название игры" variant="outlined" />
         <TextField className={componentClasses.textInput} type="number" value={melodyDuration} InputLabelProps={{ shrink: true }}
-          onChange={e => setMelodyDuration(+e.target.value)} label="Длительность мелодии (секунды)" variant="outlined" />
+          onChange={e => setMelodyDuration(e.target.value)} label="Длительность мелодии (секунды)" variant="outlined" />
       </div>
       <Message>Для создания игры загрузите картинку в формате jpg или png <span role="img" aria-label="иконка картинки">🖼 </span>
         и мелодию в формате mp3 или ogg <span role="img" aria-label="иконка мелодии">🎶</span></Message>
